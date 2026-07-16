@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Registre des visiteurs - CNRC AAPI Sidi bel Abbès</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #e9ecef; margin: 0; padding: 20px; min-height: 100vh; }
+        .container { max-width: 1500px; margin: auto; }
+        
+        /* Page de connexion */
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .login-container h2 { text-align: center; color: #0056b3; margin-bottom: 20px; }
+        .login-container input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .login-container button { width: 100%; padding: 12px; background: #0056b3; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .login-container button:hover { background: #004099; }
+        .login-error { color: red; text-align: center; margin-top: 10px; display: none; }
+        
+        /* En-tête utilisateur */
+        .user-info {
+            background: #e8f4fd;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .user-info .role { font-size: 12px; padding: 3px 8px; border-radius: 20px; background: #0056b3; color: white; }
+        .user-info .role.admin { background: #c62828; }
+        .user-info .role.user { background: #2e7d32; }
+        .logout-btn { background: #dc3545; padding: 5px 12px; border-radius: 6px; color: white; cursor: pointer; font-size: 12px; }
+        .logout-btn:hover { background: #c82333; }
+        
+        /* Cartes formulaire */
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .form-card h2 { color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-top: 0; text-align: center; }
+        .sous-titre { text-align: center; color: #666; font-size: 14px; margin-top: -10px; margin-bottom: 20px; }
+        .import-card {
+            background: #e8f4fd;
+            border: 1px dashed #0056b3;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .import-status { margin-top: 10px; font-size: 13px; }
+        .form-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; }
+        .form-group { flex: 1; min-width: 200px; }
+        .full-width { flex: 100%; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #0056b3; box-shadow: 0 0 5px rgba(0,86,179,0.3); }
+        textarea { resize: vertical; font-family: inherit; }
+        
+        /* Boutons */
+        .btn { background: #0056b3; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .btn:hover { background: #004099; }
+        .btn-action { padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; border: none; }
+        .btn-edit { background: #ffc107; color: #333; }
+        .btn-edit:hover { background: #e0a800; }
+        .btn-delete { background: #dc3545; color: white; }
+        .btn-delete:hover { background: #c82333; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-excel { background: #1f7b3a; }
+        .btn-excel:hover { background: #16632e; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-info { background: #17a2b8; }
+        .btn-info:hover { background: #138496; }
+        
+        /* Statistiques */
+        .stats-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .stats-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .stat-box { background: #f8f9fa; border-radius: 10px; padding: 15px; text-align: center; min-width: 120px; }
+        .stat-number { font-size: 28px; font-weight: bold; color: #0056b3; }
+        .stat-label { font-size: 12px; color: #666; }
+        .stat-filters { display: flex; gap: 10px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; }
+        .stat-filters .form-group { margin-bottom: 0; min-width: 150px; }
+        
+        /* Tableau */
+        .list-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .list-card h3 { margin-top: 0; color: #0056b3; }
+        .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+        .search-bar input { flex: 1; }
+        .search-icon, .clear-search { padding: 10px 15px; border-radius: 8px; cursor: pointer; background: #0056b3; color: white; text-align: center; }
+        .clear-search { background: #6c757d; }
+        .table-wrapper { max-height: 450px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th, td { border: 1px solid #ddd; padding: 6px; text-align: left; vertical-align: top; }
+        th { background: #0056b3; color: white; position: sticky; top: 0; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .badge-count { background: #28a745; color: white; padding: 2px 8px; border-radius: 20px; font-size: 11px; margin-left: 10px; }
+        .action-buttons { display: flex; gap: 4px; white-space: nowrap; }
+        
+        /* Auto-complétion */
+        .relative { position: relative; }
+        .code-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 250px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .suggestion-item { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 12px; }
+        .suggestion-item:hover { background: #0056b3; color: white; }
+        .suggestion-code { font-weight: bold; font-family: monospace; }
+        .search-result { background: #d4edda; border: 1px solid #c3e6cb; padding: 8px; border-radius: 6px; margin-top: 5px; font-size: 12px; display: none; }
+        .error { color: red; font-size: 12px; display: none; }
+        .info-format { font-size: 11px; color: #666; margin-top: 4px; }
+        .info-note { background: #fff3cd; padding: 10px; border-radius: 6px; font-size: 12px; margin-top: 15px; text-align: center; }
+        .observation-generale { background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-top: 10px; }
+        .edit-mode-indicator { background: #ffc107; padding: 8px; border-radius: 6px; text-align: center; display: none; margin-bottom: 15px; }
+        hr { margin: 15px 0; border: none; border-top: 1px solid #ddd; }
+        .search-info { font-size: 12px; margin-bottom: 10px; display: none; }
+    </style>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- PAGE DE CONNEXION -->
+<div id="loginPage" class="login-container">
+    <h2>🔐 Registre des visiteurs</h2>
+    <div style="text-align:center; font-size:13px; color:#666; margin-bottom:20px;">CNRC - AAPI Sidi bel Abbès</div>
+    <input type="text" id="loginUser" placeholder="Nom d'utilisateur">
+    <input type="password" id="loginPassword" placeholder="Mot de passe">
+    <button onclick="authentifier()">Se connecter</button>
+    <div id="loginError" class="login-error">❌ Identifiants incorrects</div>
+</div>
+
+<!-- APPLICATION PRINCIPALE -->
+<div id="appContainer" style="display:none;">
+<div class="container">
+    <div class="user-info">
+        <div>👤 <strong id="currentUser"></strong> <span id="currentUserRole" class="role"></span></div>
+        <div class="logout-btn" onclick="deconnecter()">🚪 Déconnexion</div>
+    </div>
+    
+    <!-- Formulaire d'enregistrement -->
+    <div class="form-card">
+        <h2>📋 Enregistrement Visiteur</h2>
+        <div class="sous-titre">Représentant du CNRC à l'AAPI - Sidi bel Abbès</div>
+        <div id="editModeIndicator" class="edit-mode-indicator">✏️ MODE ÉDITION - Modification en cours</div>
+        
+        <div class="import-card">
+            <strong>📂 Chargement du fichier des activités</strong><br>
+            <input type="file" id="excelFile" accept=".xlsx, .xls, .csv">
+            <div id="importStatus" class="import-status"></div>
+            <div class="info-format">Fichier Excel avec 2 colonnes : Code activité | Libellé</div>
+        </div>
+        
+        <form id="visiteurForm">
+            <input type="hidden" id="editIndex" value="-1">
+            
+            <div class="form-row">
+                <div class="form-group"><label>📅 Date de la visite</label><input type="date" id="dateVisite"></div>
+                <div class="form-group"><label>👤 Nom et Prénom</label><input type="text" id="nomPrenom" placeholder="Ex: DUPONT Jean"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>📅 Date de naissance</label><input type="date" id="dateNaissance"></div>
+                <div class="form-group"><label>📍 Lieu de naissance</label><input type="text" id="lieuNaissance" placeholder="Ex: Alger"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>🏷️ Statut du visiteur</label>
+                    <select id="statutVisiteur">
+                        <option value="">-- Sélectionnez --</option>
+                        <option value="RC_Personne_Physique">📄 RC Personne Physique</option>
+                        <option value="RC_Personne_Morale">🏢 RC Personne Morale</option>
+                        <option value="Non_commercant">🛒 Non commerçant</option>
+                    </select>
+                </div>
+                <div class="form-group" id="societeField" style="display:none;"><label>🏢 Nom de la société</label><input type="text" id="nomSociete"></div>
+            </div>
+            
+            <div id="rcField" style="display:none;">
+                <div class="form-group">
+                    <label>🔢 N° Registre de commerce</label>
+                    <input type="text" id="numRC" placeholder="Ex: 01A123456789">
+                    <div class="info-format" id="rcFormatInfo">Format: 2 chiffres + A + 9 chiffres (/22 auto)</div>
+                    <div id="rcError" class="error">Format invalide</div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>🎯 Motif de la visite</label>
+                    <select id="motifVisite">
+                        <option value="">-- Sélectionnez --</option>
+                        <option value="Inscription_RC">📝 Inscription RC</option>
+                        <option value="Denomination">🏷️ Dénomination</option>
+                        <option value="Renseignement">📞 Renseignement</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="sousMenuInscription" style="display:none;">
+                <div class="form-group">
+                    <label>📌 Type d'inscription</label>
+                    <select id="typeInscription">
+                        <option value="">-- Sélectionnez --</option>
+                        <option value="Immatriculation_Principale">1- Immatriculation Principale</option>
+                        <option value="Modification_Principale">2- Modification Principale</option>
+                        <option value="Immatriculation_Secondaire">3- Immatriculation Secondaire</option>
+                        <option value="Modification_Secondaire">4- Modification Secondaire</option>
+                        <option value="Radiation">5- Radiation</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="inscriptionRCFields" style="display:none;">
+                <div class="form-row">
+                    <div class="form-group"><label>🔢 N° RC (inscription)</label><input type="text" id="numRCInscription" placeholder="Ex: 01A123456789"></div>
+                    <div class="form-group">
+                        <label>🔍 Code activité</label>
+                        <div class="relative">
+                            <input type="text" id="codeActivite" placeholder="Tapez code ou libellé">
+                            <div id="suggestions" class="code-suggestions" style="display:none;"></div>
+                        </div>
+                        <div id="activiteInfo" class="search-result"></div>
+                        <div id="codeError" class="error">Code activité non trouvé</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="denominationFields" style="display:none;">
+                <div class="form-row">
+                    <div class="form-group"><label>🔢 Numéro dénomination</label><input type="text" id="numDenomination"></div>
+                    <div class="form-group"><label>📝 Libellé dénomination</label><input type="text" id="libelleDenomination"></div>
+                </div>
+            </div>
+            
+            <div id="renseignementFields" style="display:none;">
+                <div class="form-group">
+                    <label>🔍 Code activité</label>
+                    <div class="relative">
+                        <input type="text" id="codeActiviteRenseignement" placeholder="Tapez code ou libellé">
+                        <div id="suggestionsRenseignement" class="code-suggestions" style="display:none;"></div>
+                    </div>
+                    <div id="activiteInfoRenseignement" class="search-result"></div>
+                </div>
+            </div>
+            
+            <div class="observation-generale">
+                <div class="form-group full-width">
+                    <label>📝 Observation générale</label>
+                    <textarea id="observationGenerale" rows="2" placeholder="Information complémentaire..."></textarea>
+                </div>
+            </div>
+            
+            <div class="info-note">ℹ️ Tous les champs sont optionnels</div>
+            <hr>
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn" id="submitBtn" style="flex:2">✅ Enregistrer</button>
+                <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display:none; flex:1">❌ Annuler</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Statistiques -->
+    <div class="stats-card">
+        <h3>📊 Statistiques par motif</h3>
+        <div class="stat-filters">
+            <div class="form-group"><label>Date début</label><input type="date" id="statsDateDebut"></div>
+            <div class="form-group"><label>Date fin</label><input type="date" id="statsDateFin"></div>
+            <div><button class="btn btn-info" onclick="calculerStatistiques()">📈 Calculer</button></div>
+        </div>
+        <div id="statsResultat" class="stats-container"></div>
+        <div id="statsDetail" style="margin-top:10px; font-size:12px; text-align:center;"></div>
+    </div>
+    
+    <!-- Liste des visiteurs -->
+    <div class="list-card">
+        <h3>📊 Visiteurs enregistrés <span id="nbVisiteurs" class="badge-count">0</span></h3>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="🔍 Rechercher par nom...">
+            <span class="search-icon">🔍</span>
+            <span class="clear-search" onclick="reinitialiserRecherche()">✖ Effacer</span>
+        </div>
+        <div id="searchInfo" class="search-info"></div>
+        <div class="table-wrapper">
+            <table id="tableVisiteurs">
+                <thead>
+                    <tr><th style="width:70px">Actions</th><th>Date</th><th>Visiteur</th><th>Naiss.</th><th>Lieu</th><th>Statut</th><th>Société</th><th>N° RC</th><th>Motif</th><th>Type Ins.</th><th>N° RC Ins.</th><th>Code</th><th>Libellé</th><th>N° Dén.</th><th>Libellé Dén.</th><th>Obs.</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-success" onclick="exporterCSV()">📎 Exporter CSV</button>
+            <button class="btn btn-excel" onclick="exporterExcel()">📊 Exporter Excel</button>
+            <button class="btn btn-warning" onclick="importerExcel()">📂 Importer Excel</button>
+            <button class="btn btn-secondary" onclick="imprimerListe()">🖨️ Imprimer</button>
+        </div>
+        <div class="info-note">
+            💾 Sauvegarde automatique | ✏️ Modifier: <span style="background:#ffc107; padding:2px 6px;">✏️</span> | 🗑️ Supprimer: <span style="background:#dc3545; padding:2px 6px; color:white;">🗑️</span><br>
+            🔐 Déconnexion automatique après 5 minutes d'inactivité
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    // ==================== COMPTES UTILISATEURS ====================
+    const utilisateursDefaut = {
+        'admin': { password: 'admin123', role: 'admin', name: 'Administrateur' },
+        'user': { password: 'user123', role: 'user', name: 'Utilisateur' }
+    };
+    
+    function chargerUtilisateurs() {
+        const saved = localStorage.getItem('utilisateurs');
+        if (saved) return JSON.parse(saved);
+        else { localStorage.setItem('utilisateurs', JSON.stringify(utilisateursDefaut)); return utilisateursDefaut; }
+    }
+    
+    let UTILISATEURS = chargerUtilisateurs();
+    let currentUser = null;
+    let codesActivites = [];
+    let activiteMap = new Map();
+    let visiteurs = JSON.parse(localStorage.getItem('visiteurs_registre')) || [];
+    let editMode = false;
+    let filtreRecherche = '';
+    
+    // ==================== DÉCONNEXION AUTOMATIQUE ====================
+    let inactivityTimer;
+    const INACTIVITY_DELAY = 5 * 60 * 1000; // 5 minutes
+    
+    function resetInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            if (currentUser) {
+                const stayConnected = confirm('🔐 Inactivité prolongée détectée (5 minutes).\nVoulez-vous rester connecté ?');
+                if (stayConnected) {
+                    resetInactivityTimer();
+                } else {
+                    deconnecter();
+                }
+            }
+        }, INACTIVITY_DELAY);
+    }
+    
+    function activiteDetectee() {
+        if (currentUser) {
+            resetInactivityTimer();
+        }
+    }
+    
+    // Écouteurs d'événements d'activité
+    const activiteEvents = ['mousemove', 'mousedown', 'keypress', 'keydown', 'scroll', 'click', 'touchstart'];
+    activiteEvents.forEach(event => {
+        document.addEventListener(event, activiteDetectee);
+    });
+    // ================================================================
+    
+    // ==================== AUTHENTIFICATION ====================
+    function checkSession() {
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser && UTILISATEURS[savedUser]) {
+            currentUser = savedUser;
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            document.getElementById('currentUser').innerText = UTILISATEURS[currentUser].name || currentUser;
+            const roleSpan = document.getElementById('currentUserRole');
+            roleSpan.innerText = UTILISATEURS[currentUser].role === 'admin' ? 'Administrateur' : 'Utilisateur';
+            roleSpan.className = 'role ' + (UTILISATEURS[currentUser].role === 'admin' ? 'admin' : 'user');
+            appliquerDroits();
+            initialiserApp();
+            resetInactivityTimer(); // Démarrer le timer
+        }
+    }
+    
+    function authentifier() {
+        const user = document.getElementById('loginUser').value.trim();
+        const pwd = document.getElementById('loginPassword').value;
+        if (UTILISATEURS[user] && UTILISATEURS[user].password === pwd) {
+            currentUser = user;
+            localStorage.setItem('currentUser', user);
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            document.getElementById('currentUser').innerText = UTILISATEURS[currentUser].name || currentUser;
+            const roleSpan = document.getElementById('currentUserRole');
+            roleSpan.innerText = UTILISATEURS[currentUser].role === 'admin' ? 'Administrateur' : 'Utilisateur';
+            roleSpan.className = 'role ' + (UTILISATEURS[currentUser].role === 'admin' ? 'admin' : 'user');
+            appliquerDroits();
+            initialiserApp();
+            resetInactivityTimer(); // Démarrer le timer
+        } else {
+            document.getElementById('loginError').style.display = 'block';
+        }
+    }
+    
+    function deconnecter() {
+        localStorage.removeItem('currentUser');
+        currentUser = null;
+        document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('loginPage').style.display = 'block';
+        document.getElementById('loginUser').value = '';
+        document.getElementById('loginPassword').value = '';
+        clearTimeout(inactivityTimer); // Arrêter le timer
+    }
+    
+    function appliquerDroits() {
+        const isAdmin = UTILISATEURS[currentUser]?.role === 'admin';
+        if (!isAdmin) {
+            let style = document.getElementById('userRightsStyle');
+            if (!style) {
+                style = document.createElement('style');
+                style.id = 'userRightsStyle';
+                style.textContent = '.btn-edit, .btn-delete, .btn-warning, .btn-excel, .btn-success { opacity: 0.5; pointer-events: none; } .btn-edit, .btn-delete { display: none; }';
+                document.head.appendChild(style);
+            }
+        } else {
+            const style = document.getElementById('userRightsStyle');
+            if (style) style.remove();
+        }
+    }
+    
+    // ==================== FONCTIONS UTILITAIRES ====================
+    function ajouterSuffixeRC(rc) { if (!rc) return ''; rc = rc.trim().toUpperCase(); return rc.endsWith('/22') ? rc : rc + '/22'; }
+    function enleverSuffixeRC(rc) { if (!rc) return ''; return rc.endsWith('/22') ? rc.slice(0, -3) : rc; }
+    
+    function getStatutTexte(s) { return s==='RC_Personne_Physique'?'RC Physique':s==='RC_Personne_Morale'?'RC Morale':s==='Non_commercant'?'Non commerçant':''; }
+    function getMotifTexte(m) { return m==='Inscription_RC'?'Inscription RC':m==='Denomination'?'Dénomination':m==='Renseignement'?'Renseignement':''; }
+    function getTypeInscriptionTexte(t) { 
+        return t==='Immatriculation_Principale'?'Immatric. Princ.':t==='Modification_Principale'?'Modif. Princ.':t==='Immatriculation_Secondaire'?'Immatric. Sec.':t==='Modification_Secondaire'?'Modif. Sec.':t==='Radiation'?'Radiation':'';
+    }
+    
+    // ==================== RECHERCHE ACTIVITÉS ====================
+    function rechercherActivites(terme) {
+        if (!terme || terme.trim() === "") return [];
+        terme = terme.toLowerCase().trim();
+        return codesActivites.filter(a => a.code.toLowerCase().includes(terme) || a.libelle.toLowerCase().includes(terme));
+    }
+    
+    function setupAutocomplete(inputId, suggestionsId, infoId, errorId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        
+        input.addEventListener('input', function(e) {
+            const terme = this.value.trim();
+            const suggestionsDiv = document.getElementById(suggestionsId);
+            const infoDiv = document.getElementById(infoId);
+            const errorDiv = errorId ? document.getElementById(errorId) : null;
+            
+            if (terme.length < 1) {
+                if (suggestionsDiv) suggestionsDiv.style.display = 'none';
+                if (infoDiv) infoDiv.style.display = 'none';
+                if (errorDiv) errorDiv.style.display = 'none';
+                return;
+            }
+            
+            const resultats = rechercherActivites(terme);
+            
+            if (resultats.length > 0) {
+                if (suggestionsDiv) {
+                    suggestionsDiv.innerHTML = '';
+                    resultats.slice(0, 15).forEach(r => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        div.innerHTML = `<span class="suggestion-code">${r.code}</span> - ${r.libelle.substring(0, 80)}`;
+                        div.onclick = () => {
+                            input.value = r.code;
+                            suggestionsDiv.style.display = 'none';
+                            if (infoDiv) {
+                                infoDiv.style.display = 'block';
+                                infoDiv.innerHTML = `✅ <strong>${r.code}</strong> : ${r.libelle}`;
+                            }
+                            if (errorDiv) errorDiv.style.display = 'none';
+                        };
+                        suggestionsDiv.appendChild(div);
+                    });
+                    suggestionsDiv.style.display = 'block';
+                }
+            } else if (activiteMap.has(terme.toUpperCase())) {
+                if (suggestionsDiv) suggestionsDiv.style.display = 'none';
+                if (infoDiv) {
+                    infoDiv.style.display = 'block';
+                    infoDiv.innerHTML = `✅ <strong>${terme.toUpperCase()}</strong> : ${activiteMap.get(terme.toUpperCase())}`;
+                }
+                if (errorDiv) errorDiv.style.display = 'none';
+            } else {
+                if (suggestionsDiv) suggestionsDiv.style.display = 'none';
+                if (infoDiv) infoDiv.style.display = 'none';
+                if (errorDiv) errorDiv.style.display = 'block';
+            }
+        });
+    }
+    
+    // ==================== CHARGEMENT EXCEL ACTIVITÉS ====================
+    document.getElementById('excelFile').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const statusDiv = document.getElementById('importStatus');
+        statusDiv.innerHTML = '⏳ Chargement en cours...';
+        statusDiv.style.color = 'black';
+        
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+            
+            codesActivites = [];
+            activiteMap.clear();
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                if (row.length >= 2) {
+                    let code = String(row[0]).trim();
+                    let libelle = String(row[1]).trim();
+                    if (code && libelle && code !== 'Code Activité' && code !== 'CODE' && code !== 'code') {
+                        codesActivites.push({ code: code, libelle: libelle });
+                        activiteMap.set(code, libelle);
+                    }
+                }
+            }
+            
+            if (codesActivites.length > 0) {
+                statusDiv.innerHTML = `✅ Chargé avec succès : ${codesActivites.length} codes activités`;
+                statusDiv.style.color = 'green';
+                document.getElementById('submitBtn').disabled = false;
+                setupAutocomplete('codeActivite', 'suggestions', 'activiteInfo', 'codeError');
+                setupAutocomplete('codeActiviteRenseignement', 'suggestionsRenseignement', 'activiteInfoRenseignement', null);
+            } else {
+                statusDiv.innerHTML = '❌ Aucune donnée trouvée. Format attendu: Code | Libellé';
+                statusDiv.style.color = 'red';
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+    
+    // ==================== AFFICHAGE TABLEAU ====================
+    function getVisiteursFiltres() {
+        if (!filtreRecherche) return visiteurs;
+        return visiteurs.filter(v => v.nomPrenom && v.nomPrenom.toLowerCase().includes(filtreRecherche.toLowerCase()));
+    }
+    
+    function afficherTableau() {
+        const tbody = document.querySelector('#tableVisiteurs tbody');
+        const filtres = getVisiteursFiltres();
+        tbody.innerHTML = '';
+        
+        if (filtres.length === 0 && visiteurs.length > 0) {
+            tbody.innerHTML = '<tr><td colspan="16" style="text-align:center">🔍 Aucun résultat</td></tr>';
+        } else if (filtres.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="16" style="text-align:center">Aucun visiteur enregistré</td></tr>';
+        } else {
+            filtres.forEach(v => {
+                const idx = visiteurs.findIndex(orig => orig === v);
+                const libelle = activiteMap.get(v.codeActivite) || v.libelleActivite || '';
+                tbody.innerHTML += `<tr>
+                    <td class="action-buttons">
+                        <button class="btn-action btn-edit" onclick="modifierEnregistrement(${idx})" title="Modifier">✏️</button>
+                        <button class="btn-action btn-delete" onclick="supprimerEnregistrement(${idx})" title="Supprimer">🗑️</button>
+                    </td>
+                    <td>${v.date || ''}</td>
+                    <td>${v.nomPrenom || ''}</td>
+                    <td>${v.dateNaissance || ''}</td>
+                    <td>${v.lieuNaissance || ''}</td>
+                    <td>${getStatutTexte(v.statutVisiteur)}</td>
+                    <td>${v.nomSociete || ''}</td>
+                    <td>${v.numRC || ''}</td>
+                    <td>${getMotifTexte(v.motifVisite)}</td>
+                    <td>${getTypeInscriptionTexte(v.typeInscription)}</td>
+                    <td>${v.numRCInscription || ''}</td>
+                    <td>${v.codeActivite || ''}</td>
+                    <td>${libelle.length > 35 ? libelle.substring(0,35)+'...' : libelle}</td>
+                    <td>${v.numDenomination || ''}</td>
+                    <td>${v.libelleDenomination || ''}</td>
+                    <td>${v.observationGenerale || ''}</td>
+                </tr>`;
+            });
+        }
+        
+        document.getElementById('nbVisiteurs').innerText = visiteurs.length;
+        const info = document.getElementById('searchInfo');
+        if (filtreRecherche) {
+            info.style.display = 'block';
+            info.innerHTML = `🔍 ${filtres.length} résultat(s) pour "${filtreRecherche}" sur ${visiteurs.length} total`;
+        } else {
+            info.style.display = 'none';
+        }
+    }
+    
+    // ==================== MODIFICATION / SUPPRESSION ====================
+    function modifierEnregistrement(idx) {
+        const isAdmin = UTILISATEURS[currentUser]?.role === 'admin';
+        if (!isAdmin) { alert('Vous n\'avez pas les droits pour modifier'); return; }
+        
+        const v = visiteurs[idx];
+        if (!v) return;
+        editMode = true;
+        document.getElementById('editIndex').value = idx;
+        document.getElementById('editModeIndicator').style.display = 'block';
+        document.getElementById('cancelEditBtn').style.display = 'block';
+        document.getElementById('submitBtn').style.background = '#ffc107';
+        document.getElementById('submitBtn').innerHTML = '✏️ Mettre à jour';
+        
+        document.getElementById('dateVisite').value = v.date || '';
+        document.getElementById('nomPrenom').value = v.nomPrenom || '';
+        document.getElementById('dateNaissance').value = v.dateNaissance || '';
+        document.getElementById('lieuNaissance').value = v.lieuNaissance || '';
+        document.getElementById('statutVisiteur').value = v.statutVisiteur || '';
+        document.getElementById('nomSociete').value = v.nomSociete || '';
+        document.getElementById('numRC').value = enleverSuffixeRC(v.numRC) || '';
+        document.getElementById('motifVisite').value = v.motifVisite || '';
+        document.getElementById('typeInscription').value = v.typeInscription || '';
+        document.getElementById('numRCInscription').value = enleverSuffixeRC(v.numRCInscription) || '';
+        document.getElementById('codeActivite').value = v.codeActivite || '';
+        document.getElementById('numDenomination').value = v.numDenomination || '';
+        document.getElementById('libelleDenomination').value = v.libelleDenomination || '';
+        document.getElementById('codeActiviteRenseignement').value = v.codeActivite || '';
+        document.getElementById('observationGenerale').value = v.observationGenerale || '';
+        
+        document.getElementById('statutVisiteur').dispatchEvent(new Event('change'));
+        document.getElementById('motifVisite').dispatchEvent(new Event('change'));
+        
+        if (v.codeActivite && activiteMap.has(v.codeActivite)) {
+            const info = document.getElementById('activiteInfo');
+            if (info) {
+                info.style.display = 'block';
+                info.innerHTML = `✅ <strong>${v.codeActivite}</strong> : ${activiteMap.get(v.codeActivite)}`;
+            }
+        }
+        document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function supprimerEnregistrement(idx) {
+        const isAdmin = UTILISATEURS[currentUser]?.role === 'admin';
+        if (!isAdmin) { alert('Vous n\'avez pas les droits pour supprimer'); return; }
+        if (confirm(`Supprimer l'enregistrement de "${visiteurs[idx].nomPrenom || 'ce visiteur'}" ?`)) {
+            visiteurs.splice(idx, 1);
+            localStorage.setItem('visiteurs_registre', JSON.stringify(visiteurs));
+            afficherTableau();
+            calculerStatistiques();
+            alert('✅ Supprimé');
+        }
+    }
+    
+    function annulerModification() {
+        editMode = false;
+        document.getElementById('editIndex').value = '-1';
+        document.getElementById('editModeIndicator').style.display = 'none';
+        document.getElementById('cancelEditBtn').style.display = 'none';
+        document.getElementById('submitBtn').style.background = '#0056b3';
+        document.getElementById('submitBtn').innerHTML = '✅ Enregistrer';
+        document.getElementById('visiteurForm').reset();
+        document.getElementById('rcField').style.display = 'none';
+        document.getElementById('societeField').style.display = 'none';
+        document.getElementById('sousMenuInscription').style.display = 'none';
+        document.getElementById('inscriptionRCFields').style.display = 'none';
+        document.getElementById('denominationFields').style.display = 'none';
+        document.getElementById('renseignementFields').style.display = 'none';
+        const infoDiv = document.getElementById('activiteInfo');
+        if (infoDiv) infoDiv.style.display = 'none';
+    }
+    
+    // ==================== ENREGISTREMENT ====================
+    function enregistrerVisiteur() {
+        const isAdmin = UTILISATEURS[currentUser]?.role === 'admin';
+        
+        const nouveau = {
+            date: document.getElementById('dateVisite').value,
+            nomPrenom: document.getElementById('nomPrenom').value.trim().toUpperCase(),
+            dateNaissance: document.getElementById('dateNaissance').value,
+            lieuNaissance: document.getElementById('lieuNaissance').value.trim().toUpperCase(),
+            statutVisiteur: document.getElementById('statutVisiteur').value,
+            nomSociete: document.getElementById('nomSociete').value.trim().toUpperCase(),
+            numRC: ajouterSuffixeRC(document.getElementById('numRC').value),
+            motifVisite: document.getElementById('motifVisite').value,
+            typeInscription: document.getElementById('typeInscription').value,
+            numRCInscription: ajouterSuffixeRC(document.getElementById('numRCInscription').value),
+            codeActivite: document.getElementById('codeActivite')?.value.trim().toUpperCase() || document.getElementById('codeActiviteRenseignement')?.value.trim().toUpperCase() || '',
+            libelleActivite: '',
+            numDenomination: document.getElementById('numDenomination')?.value.trim() || '',
+            libelleDenomination: document.getElementById('libelleDenomination')?.value.trim().toUpperCase() || '',
+            observationGenerale: document.getElementById('observationGenerale').value.trim()
+        };
+        
+        if (nouveau.codeActivite && activiteMap.has(nouveau.codeActivite)) {
+            nouveau.libelleActivite = activiteMap.get(nouveau.codeActivite);
+        }
+        
+        const idx = parseInt(document.getElementById('editIndex').value);
+        if (idx >= 0 && idx < visiteurs.length && isAdmin) {
+            visiteurs[idx] = nouveau;
+            alert('✏️ Enregistrement modifié');
+        } else {
+            visiteurs.push(nouveau);
+            alert('✅ Nouveau visiteur enregistré');
+        }
+        
+        localStorage.setItem('visiteurs_registre', JSON.stringify(visiteurs));
+        afficherTableau();
+        calculerStatistiques();
+        annulerModification();
+    }
+    
+    // ==================== STATISTIQUES ====================
+    function calculerStatistiques() {
+        const debut = document.getElementById('statsDateDebut').value;
+        const fin = document.getElementById('statsDateFin').value;
+        let ins = 0, den = 0, ren = 0;
+        visiteurs.forEach(v => {
+            if (debut && v.date < debut) return;
+            if (fin && v.date > fin) return;
+            if (v.motifVisite === 'Inscription_RC') ins++;
+            else if (v.motifVisite === 'Denomination') den++;
+            else if (v.motifVisite === 'Renseignement') ren++;
+        });
+        document.getElementById('statsResultat').innerHTML = `
+            <div class="stat-box"><div class="stat-number">${ins}</div><div class="stat-label">Inscription RC</div></div>
+            <div class="stat-box"><div class="stat-number">${den}</div><div class="stat-label">Dénomination</div></div>
+            <div class="stat-box"><div class="stat-number">${ren}</div><div class="stat-label">Renseignement</div></div>
+            <div class="stat-box"><div class="stat-number">${ins+den+ren}</div><div class="stat-label">Total</div></div>`;
+        document.getElementById('statsDetail').innerHTML = (debut || fin) ? `Période du ${debut||'début'} au ${fin||'fin'}` : 'Toutes périodes';
+    }
+    
+    // ==================== EXPORT / IMPORT ====================
+    function exporterCSV() {
+        const filtres = getVisiteursFiltres();
+        if (!filtres.length) { alert('Aucune donnée'); return; }
+        let csv = 'Date;Visiteur;Date naissance;Lieu naissance;Statut;Société;N° RC;Motif;Type Inscription;N° RC Inscription;Code activité;Libellé activité;N° Dénomination;Libellé Dénomination;Observation\n';
+        filtres.forEach(v => {
+            csv += `"${v.date||''}";"${v.nomPrenom||''}";"${v.dateNaissance||''}";"${v.lieuNaissance||''}";"${getStatutTexte(v.statutVisiteur)}";"${v.nomSociete||''}";"${v.numRC||''}";"${getMotifTexte(v.motifVisite)}";"${getTypeInscriptionTexte(v.typeInscription)}";"${v.numRCInscription||''}";"${v.codeActivite||''}";"${activiteMap.get(v.codeActivite)||v.libelleActivite||''}";"${v.numDenomination||''}";"${v.libelleDenomination||''}";"${v.observationGenerale||''}"\n`;
+        });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv' }));
+        a.download = `visiteurs${filtreRecherche ? '_' + filtreRecherche : ''}_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+    }
+    
+    function exporterExcel() {
+        const filtres = getVisiteursFiltres();
+        if (!filtres.length) { alert('Aucune donnée'); return; }
+        const data = [['Date','Visiteur','Date naissance','Lieu naissance','Statut','Société','N° RC','Motif','Type Inscription','N° RC Inscription','Code activité','Libellé activité','N° Dénomination','Libellé Dénomination','Observation']];
+        filtres.forEach(v => {
+            data.push([v.date||'', v.nomPrenom||'', v.dateNaissance||'', v.lieuNaissance||'', getStatutTexte(v.statutVisiteur), v.nomSociete||'', v.numRC||'', getMotifTexte(v.motifVisite), getTypeInscriptionTexte(v.typeInscription), v.numRCInscription||'', v.codeActivite||'', activiteMap.get(v.codeActivite)||v.libelleActivite||'', v.numDenomination||'', v.libelleDenomination||'', v.observationGenerale||'']);
+        });
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        ws['!cols'] = [{wch:12},{wch:25},{wch:12},{wch:15},{wch:15},{wch:25},{wch:18},{wch:15},{wch:18},{wch:18},{wch:12},{wch:45},{wch:15},{wch:22},{wch:30}];
+        XLSX.utils.book_append_sheet(wb, ws, 'Visiteurs');
+        XLSX.writeFile(wb, `visiteurs${filtreRecherche ? '_' + filtreRecherche : ''}_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+    
+    function importerExcel() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.xlsx,.xls,.csv';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const data = new Uint8Array(ev.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
+                const nouvelles = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const r = rows[i];
+                    if (r[0]) nouvelles.push({
+                        date: r[0]||'', nomPrenom: r[1]?String(r[1]).trim().toUpperCase():'', dateNaissance: r[2]||'', lieuNaissance: r[3]?String(r[3]).trim().toUpperCase():'',
+                        statutVisiteur: r[4]||'', nomSociete: r[5]?String(r[5]).trim().toUpperCase():'', numRC: r[6]||'', motifVisite: r[7]||'', typeInscription: r[8]||'',
+                        numRCInscription: r[9]||'', codeActivite: r[10]||'', libelleActivite: r[11]||'', numDenomination: r[12]||'', libelleDenomination: r[13]?String(r[13]).trim().toUpperCase():'', observationGenerale: r[14]||''
+                    });
+                }
+                if (nouvelles.length && confirm(`${nouvelles.length} enregistrements trouvés. Remplacer les données actuelles ?`)) {
+                    visiteurs = nouvelles;
+                    localStorage.setItem('visiteurs_registre', JSON.stringify(visiteurs));
+                    afficherTableau();
+                    calculerStatistiques();
+                    alert(`✅ ${visiteurs.length} enregistrements importés`);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        };
+        input.click();
+    }
+    
+    function reinitialiserRecherche() {
+        document.getElementById('searchInput').value = '';
+        filtreRecherche = '';
+        afficherTableau();
+    }
+    
+    function imprimerListe() {
+        const filtres = getVisiteursFiltres();
+        if (!filtres.length) { alert('Aucune donnée'); return; }
+        let rows = '';
+        filtres.forEach(v => {
+            rows += `<tr>
+                <td>${v.date||''}</td>
+                <td>${v.nomPrenom||''}</td>
+                <td>${v.dateNaissance||''}</td>
+                <td>${v.lieuNaissance||''}</td>
+                <td>${getStatutTexte(v.statutVisiteur)}</td>
+                <td>${v.nomSociete||''}</td>
+                <td>${v.numRC||''}</td>
+                <td>${getMotifTexte(v.motifVisite)}</td>
+                <td>${getTypeInscriptionTexte(v.typeInscription)}</td>
+                <td>${v.numRCInscription||''}</td>
+                <td>${v.codeActivite||''}</td>
+                <td>${activiteMap.get(v.codeActivite)||v.libelleActivite||''}</td>
+                <td>${v.numDenomination||''}</td>
+                <td>${v.libelleDenomination||''}</td>
+                <td>${v.observationGenerale||''}</td>
+            </tr>`;
+        });
+        const win = window.open();
+        win.document.write(`<html><head><title>Visiteurs - CNRC AAPI</title><style>body{font-family:Arial;padding:20px} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:5px} th{background:#0056b3;color:white}</style></head><body><h2>Liste des visiteurs - CNRC AAPI Sidi bel Abbès</h2><h3>${new Date().toLocaleDateString()}</h3>${filtreRecherche ? `<p>🔍 Filtre: "${filtreRecherche}" (${filtres.length} résultats)</p>` : ''}<table><thead><tr><th>Date</th><th>Visiteur</th><th>Naiss.</th><th>Lieu</th><th>Statut</th><th>Société</th><th>N° RC</th><th>Motif</th><th>Type Ins.</th><th>N° RC Ins.</th><th>Code</th><th>Libellé</th><th>N° Dén.</th><th>Libellé Dén.</th><th>Obs.</th></tr></thead><tbody>${rows}</tbody></table><p>Total: ${filtres.length} visiteur(s)</p></body></html>`);
+        win.print();
+    }
+    
+    // ==================== INITIALISATION ====================
+    function initialiserApp() {
+        afficherTableau();
+        calculerStatistiques();
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('statsDateDebut').value = today;
+        document.getElementById('statsDateFin').value = today;
+        
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            filtreRecherche = this.value.trim();
+            afficherTableau();
+        });
+        
+        document.getElementById('visiteurForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            enregistrerVisiteur();
+        });
+        
+        document.getElementById('cancelEditBtn').addEventListener('click', annulerModification);
+        
+        // Événements formulaire
+        document.getElementById('statutVisiteur').addEventListener('change', function() {
+            const val = this.value;
+            if (val === 'RC_Personne_Physique') {
+                document.getElementById('rcField').style.display = 'block';
+                document.getElementById('societeField').style.display = 'none';
+                document.getElementById('rcFormatInfo').innerHTML = 'Format: 2 chiffres + <strong style="color:#c62828">A</strong> + 9 chiffres';
+            } else if (val === 'RC_Personne_Morale') {
+                document.getElementById('rcField').style.display = 'block';
+                document.getElementById('societeField').style.display = 'block';
+                document.getElementById('rcFormatInfo').innerHTML = 'Format: 2 chiffres + <strong style="color:#2e7d32">B</strong> + 9 chiffres';
+            } else {
+                document.getElementById('rcField').style.display = 'none';
+                document.getElementById('societeField').style.display = 'none';
+            }
+        });
+        
+        document.getElementById('motifVisite').addEventListener('change', function() {
+            const val = this.value;
+            document.getElementById('sousMenuInscription').style.display = 'none';
+            document.getElementById('inscriptionRCFields').style.display = 'none';
+            document.getElementById('denominationFields').style.display = 'none';
+            document.getElementById('renseignementFields').style.display = 'none';
+            if (val === 'Inscription_RC') {
+                document.getElementById('sousMenuInscription').style.display = 'block';
+                document.getElementById('inscriptionRCFields').style.display = 'block';
+            } else if (val === 'Denomination') {
+                document.getElementById('denominationFields').style.display = 'block';
+            } else if (val === 'Renseignement') {
+                document.getElementById('renseignementFields').style.display = 'block';
+            }
+        });
+        
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.relative')) {
+                const s1 = document.getElementById('suggestions');
+                const s2 = document.getElementById('suggestionsRenseignement');
+                if (s1) s1.style.display = 'none';
+                if (s2) s2.style.display = 'none';
+            }
+        });
+        
+        // Réinitialiser la couleur du bouton submit si désactivé
+        document.getElementById('submitBtn').disabled = false;
+    }
+    
+    // Démarrer l'application
+    checkSession();
+</script>
+</body>
+</html>

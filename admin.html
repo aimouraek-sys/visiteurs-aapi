@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des utilisateurs - CNRC AAPI</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        .card h2 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .btn:hover { background: #5a67d8; }
+        .btn-danger { background: #e53e3e; }
+        .btn-danger:hover { background: #c53030; }
+        .btn-success { background: #48bb78; }
+        .btn-success:hover { background: #38a169; }
+        .btn-warning { background: #ed8936; }
+        .btn-warning:hover { background: #dd6b20; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #667eea;
+            color: white;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        .action-buttons button {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+        .info-note {
+            background: #fef5e7;
+            border-left: 4px solid #ed8936;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 13px;
+            border-radius: 6px;
+        }
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: #f7fafc;
+            padding: 10px 15px;
+            border-radius: 8px;
+            flex: 1;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+        .error {
+            color: #e53e3e;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+        .success {
+            color: #38a169;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h2>👥 Gestion des utilisateurs</h2>
+        <p style="color:#666; margin-bottom:20px;">Créer, modifier ou supprimer des comptes pour l'application Registre des visiteurs</p>
+        
+        <!-- Formulaire d'ajout/modification -->
+        <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 id="formTitle">➕ Ajouter un utilisateur</h3>
+            <input type="hidden" id="editIndex" value="-1">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nom d'utilisateur *</label>
+                    <input type="text" id="username" placeholder="Ex: dupont">
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe *</label>
+                    <input type="password" id="password" placeholder="Mot de passe">
+                </div>
+                <div class="form-group">
+                    <label>Nom complet</label>
+                    <input type="text" id="fullname" placeholder="Ex: Jean Dupont">
+                </div>
+                <div class="form-group">
+                    <label>Rôle *</label>
+                    <select id="role">
+                        <option value="user">👤 Utilisateur (consultation + ajout)</option>
+                        <option value="admin">👑 Administrateur (tous droits)</option>
+                    </select>
+                </div>
+            </div>
+            <div id="formError" class="error"></div>
+            <div id="formSuccess" class="success"></div>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn" onclick="enregistrerUtilisateur()">💾 Enregistrer</button>
+                <button class="btn btn-warning" onclick="annulerEdition()" id="cancelBtn" style="display:none;">❌ Annuler</button>
+            </div>
+        </div>
+        
+        <!-- Statistiques -->
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number" id="totalUsers">0</div>
+                <div class="stat-label">Total utilisateurs</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="adminCount">0</div>
+                <div class="stat-label">Administrateurs</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="userCount">0</div>
+                <div class="stat-label">Utilisateurs</div>
+            </div>
+        </div>
+        
+        <!-- Liste des utilisateurs -->
+        <h3>📋 Liste des utilisateurs</h3>
+        <div style="overflow-x: auto;">
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Nom d'utilisateur</th>
+                        <th>Nom complet</th>
+                        <th>Rôle</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr><td colspan="4" style="text-align:center;">Chargement...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="info-note">
+            <strong>ℹ️ Informations :</strong><br>
+            • Les utilisateurs sont stockés dans le localStorage de votre navigateur.<br>
+            • Pour distribuer l'application avec ces utilisateurs, copiez le code de la page principale après avoir créé les comptes.<br>
+            • Mot de passe par défaut recommandé : <strong>user123</strong> pour les utilisateurs, <strong>admin123</strong> pour l'admin.
+        </div>
+        
+        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: space-between;">
+            <button class="btn btn-success" onclick="exporterUtilisateurs()">📎 Exporter les utilisateurs</button>
+            <button class="btn btn-warning" onclick="importerUtilisateurs()">📂 Importer des utilisateurs</button>
+            <button class="btn btn-danger" onclick="reinitialiserDefauts()">🔄 Réinitialiser utilisateurs par défaut</button>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>🔐 Intégration dans l'application principale</h2>
+        <p>Pour ajouter ces utilisateurs à l'application principale, copiez le code JSON ci-dessous :</p>
+        <textarea id="exportJson" rows="6" style="width:100%; font-family: monospace; font-size: 12px;" readonly></textarea>
+        <button class="btn" onclick="copierJson()" style="margin-top: 10px;">📋 Copier le code</button>
+        <p class="info-note" style="margin-top: 10px;">
+            <strong>Comment intégrer ?</strong><br>
+            1. Copiez le JSON ci-dessus<br>
+            2. Ouvrez l'application principale (Registre des visiteurs)<br>
+            3. Ouvrez la console (F12)<br>
+            4. Collez le code suivant :<br>
+            <code style="background:#f0f0f0; padding:5px; display:block;">localStorage.setItem('utilisateurs', 'LE_JSON_COPIÉ'); location.reload();</code>
+        </p>
+    </div>
+</div>
+
+<script>
+    // Utilisateurs par défaut
+    const utilisateursDefaut = {
+        'admin': { password: 'admin123', role: 'admin', name: 'Administrateur' },
+        'user': { password: 'user123', role: 'user', name: 'Utilisateur' }
+    };
+    
+    // Charger les utilisateurs depuis localStorage
+    function chargerUtilisateurs() {
+        const saved = localStorage.getItem('utilisateurs');
+        if (saved) {
+            return JSON.parse(saved);
+        } else {
+            localStorage.setItem('utilisateurs', JSON.stringify(utilisateursDefaut));
+            return utilisateursDefaut;
+        }
+    }
+    
+    let utilisateurs = chargerUtilisateurs();
+    let editMode = false;
+    let editUsername = null;
+    
+    // Sauvegarder utilisateurs
+    function sauvegarderUtilisateurs() {
+        localStorage.setItem('utilisateurs', JSON.stringify(utilisateurs));
+        afficherListe();
+        mettreAJourStats();
+    }
+    
+    // Afficher la liste
+    function afficherListe() {
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '';
+        
+        if (Object.keys(utilisateurs).length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Aucun utilisateur</td></tr>';
+            return;
+        }
+        
+        for (const [username, data] of Object.entries(utilisateurs)) {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = username;
+            row.insertCell(1).innerText = data.name || '—';
+            row.insertCell(2).innerHTML = data.role === 'admin' ? 
+                '<span style="background:#c62828; color:white; padding:2px 8px; border-radius:20px; font-size:11px;">👑 Admin</span>' : 
+                '<span style="background:#2e7d32; color:white; padding:2px 8px; border-radius:20px; font-size:11px;">👤 Utilisateur</span>';
+            
+            const actions = row.insertCell(3);
+            actions.className = 'action-buttons';
+            actions.innerHTML = `
+                <button class="btn btn-warning" onclick="editerUtilisateur('${username}')" style="padding:4px 12px;">✏️ Modifier</button>
+                <button class="btn btn-danger" onclick="supprimerUtilisateur('${username}')" style="padding:4px 12px;">🗑️ Supprimer</button>
+            `;
+        }
+        
+        // Mettre à jour l'export JSON
+        document.getElementById('exportJson').value = JSON.stringify(utilisateurs, null, 2);
+    }
+    
+    // Mettre à jour les stats
+    function mettreAJourStats() {
+        const total = Object.keys(utilisateurs).length;
+        const adminCount = Object.values(utilisateurs).filter(u => u.role === 'admin').length;
+        const userCount = Object.values(utilisateurs).filter(u => u.role === 'user').length;
+        
+        document.getElementById('totalUsers').innerText = total;
+        document.getElementById('adminCount').innerText = adminCount;
+        document.getElementById('userCount').innerText = userCount;
+    }
+    
+    // Valider le nom d'utilisateur
+    function validerUsername(username) {
+        if (!username || username.trim() === '') return false;
+        if (!/^[a-zA-Z0-9_-]+$/.test(username)) return false;
+        return true;
+    }
+    
+    // Enregistrer utilisateur
+    function enregistrerUtilisateur() {
+        const username = document.getElementById('username').value.trim().toLowerCase();
+        const password = document.getElementById('password').value;
+        const fullname = document.getElementById('fullname').value.trim();
+        const role = document.getElementById('role').value;
+        
+        const errorDiv = document.getElementById('formError');
+        const successDiv = document.getElementById('formSuccess');
+        errorDiv.style.display = 'none';
+        successDiv.style.display = 'none';
+        
+        // Vérifications
+        if (!validerUsername(username)) {
+            errorDiv.innerText = 'Nom d\'utilisateur invalide (lettres, chiffres, _ et - uniquement)';
+            errorDiv.style.display = 'block';
+            return;
+        }
+        
+        if (!editMode && utilisateurs[username]) {
+            errorDiv.innerText = 'Ce nom d\'utilisateur existe déjà';
+            errorDiv.style.display = 'block';
+            return;
+        }
+        
+        if (!password && !editMode) {
+            errorDiv.innerText = 'Le mot de passe est requis';
+            errorDiv.style.display = 'block';
+            return;
+        }
+        
+        // Création ou modification
+        if (editMode && editUsername) {
+            // Ne pas écraser l'admin par défaut si on modifie son nom
+            if (editUsername !== username && utilisateurs[username] && utilisateurs[username] !== editUsername) {
+                errorDiv.innerText = 'Ce nom d\'utilisateur existe déjà';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Supprimer l'ancien
+            const oldData = utilisateurs[editUsername];
+            delete utilisateurs[editUsername];
+            
+            // Créer le nouveau
+            utilisateurs[username] = {
+                password: password || oldData.password,
+                role: role,
+                name: fullname || oldData.name
+            };
+            
+            successDiv.innerText = '✏️ Utilisateur modifié avec succès';
+            successDiv.style.display = 'block';
+            annulerEdition();
+        } else {
+            // Nouvel utilisateur
+            utilisateurs[username] = {
+                password: password,
+                role: role,
+                name: fullname
+            };
+            successDiv.innerText = '✅ Utilisateur créé avec succès';
+            successDiv.style.display = 'block';
+            
+            // Réinitialiser formulaire
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('fullname').value = '';
+            document.getElementById('role').value = 'user';
+        }
+        
+        sauvegarderUtilisateurs();
+        
+        setTimeout(() => { successDiv.style.display = 'none'; }, 3000);
+    }
+    
+    // Éditer un utilisateur
+    function editerUtilisateur(username) {
+        const user = utilisateurs[username];
+        if (!user) return;
+        
+        editMode = true;
+        editUsername = username;
+        
+        document.getElementById('formTitle').innerHTML = '✏️ Modifier l\'utilisateur';
+        document.getElementById('username').value = username;
+        document.getElementById('username').disabled = true;
+        document.getElementById('password').value = '';
+        document.getElementById('password').placeholder = 'Laisser vide pour garder l\'ancien';
+        document.getElementById('fullname').value = user.name || '';
+        document.getElementById('role').value = user.role;
+        document.getElementById('cancelBtn').style.display = 'inline-block';
+        
+        document.getElementById('formSuccess').style.display = 'none';
+        document.getElementById('formError').style.display = 'none';
+        
+        document.querySelector('#formTitle').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Supprimer un utilisateur
+    function supprimerUtilisateur(username) {
+        if (username === 'admin') {
+            alert('⚠️ Impossible de supprimer le compte administrateur principal');
+            return;
+        }
+        
+        if (confirm(`Supprimer définitivement l'utilisateur "${username}" ?`)) {
+            delete utilisateurs[username];
+            sauvegarderUtilisateurs();
+            
+            if (editMode && editUsername === username) {
+                annulerEdition();
+            }
+            
+            document.getElementById('formSuccess').innerText = '🗑️ Utilisateur supprimé';
+            document.getElementById('formSuccess').style.display = 'block';
+            setTimeout(() => { document.getElementById('formSuccess').style.display = 'none'; }, 3000);
+        }
+    }
+    
+    // Annuler l'édition
+    function annulerEdition() {
+        editMode = false;
+        editUsername = null;
+        
+        document.getElementById('formTitle').innerHTML = '➕ Ajouter un utilisateur';
+        document.getElementById('username').disabled = false;
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('password').placeholder = 'Mot de passe';
+        document.getElementById('fullname').value = '';
+        document.getElementById('role').value = 'user';
+        document.getElementById('cancelBtn').style.display = 'none';
+        document.getElementById('formError').style.display = 'none';
+        document.getElementById('formSuccess').style.display = 'none';
+    }
+    
+    // Exporter les utilisateurs
+    function exporterUtilisateurs() {
+        const json = JSON.stringify(utilisateurs, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'utilisateurs.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+    
+    // Importer des utilisateurs
+    function importerUtilisateurs() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const imported = JSON.parse(evt.target.result);
+                    const importer = confirm(`Importer ${Object.keys(imported).length} utilisateurs ? Cela remplacera tous les utilisateurs actuels.`);
+                    if (importer) {
+                        // Vérifier qu'il y a au moins un admin
+                        let hasAdmin = false;
+                        for (const [u, data] of Object.entries(imported)) {
+                            if (data.role === 'admin') hasAdmin = true;
+                        }
+                        if (!hasAdmin) {
+                            alert('⚠️ Le fichier ne contient aucun administrateur. Au moins un admin est requis.');
+                            return;
+                        }
+                        utilisateurs = imported;
+                        sauvegarderUtilisateurs();
+                        annulerEdition();
+                        alert(`✅ ${Object.keys(utilisateurs).length} utilisateurs importés`);
+                    }
+                } catch(err) {
+                    alert('Fichier invalide');
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+    
+    // Réinitialiser aux utilisateurs par défaut
+    function reinitialiserDefauts() {
+        if (confirm('Réinitialiser aux utilisateurs par défaut (admin/user) ? Tous les utilisateurs créés seront perdus.')) {
+            utilisateurs = JSON.parse(JSON.stringify(utilisateursDefaut));
+            sauvegarderUtilisateurs();
+            annulerEdition();
+            alert('✅ Réinitialisation effectuée');
+        }
+    }
+    
+    // Copier le JSON dans le presse-papier
+    function copierJson() {
+        const json = document.getElementById('exportJson').value;
+        navigator.clipboard.writeText(json).then(() => {
+            alert('✅ Code JSON copié !');
+        }).catch(() => {
+            alert('❌ Impossible de copier');
+        });
+    }
+    
+    // Initialisation
+    afficherListe();
+    mettreAJourStats();
+</script>
+</body>
+</html>
