@@ -353,17 +353,17 @@
     // ==================== CHARGEMENT DES AGENTS ====================
     let agents = [];
     let currentUser = null;
-    let editMode = false;
     
-    const adminDefaut = {
-        nom: 'Administrateur',
-        prenom: 'AAPI',
-        service: 'Administration',
-        direction: 'Direction Générale',
-        login: 'admin',
-        password: 'admin123',
-        role: 'admin'
-    };
+    function chargerAgents() {
+        const saved = localStorage.getItem('agents_aapi');
+        if (saved) {
+            agents = JSON.parse(saved);
+        } else {
+            agents = [{ nom: 'Administrateur', prenom: 'AAPI', service: 'Administration', direction: 'Direction Générale', login: 'admin', password: 'Admin2026Secure!', role: 'admin' }];
+            localStorage.setItem('agents_aapi', JSON.stringify(agents));
+        }
+        return agents;
+    }
     
     function chargerAgents() {
         const saved = localStorage.getItem('agents_aapi');
