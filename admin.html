@@ -2,32 +2,44 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Gestion des utilisateurs - CNRC AAPI</title>
+    <title>Administration - Gestion des agents AAPI</title>
     <style>
         * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #e9ecef; margin: 0; padding: 20px; min-height: 100vh; }
+        .container { max-width: 1200px; margin: auto; }
+        
+        .header {
+            background: linear-gradient(135deg, #0056b3, #007bff);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
         }
-        .container {
-            max-width: 1200px;
-            margin: auto;
-        }
-        .card {
+        .header h1 { margin: 0; font-size: 24px; }
+        .header .subtitle { font-size: 14px; opacity: 0.8; }
+        .header .user-info { font-size: 14px; background: rgba(255,255,255,0.15); padding: 8px 15px; border-radius: 20px; }
+        .header .logout-btn { background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; }
+        .header .logout-btn:hover { background: rgba(255,255,255,0.3); }
+        
+        .form-card {
             background: white;
             border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             margin-bottom: 30px;
         }
-        .card h2 {
-            color: #333;
-            border-bottom: 2px solid #667eea;
+        .form-card h2 {
+            color: #0056b3;
+            border-bottom: 2px solid #0056b3;
             padding-bottom: 10px;
             margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .form-row {
             display: flex;
@@ -43,40 +55,57 @@
             display: block;
             font-weight: bold;
             margin-bottom: 5px;
-            color: #555;
+            color: #333;
+            font-size: 13px;
         }
         input, select {
             width: 100%;
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid #ccc;
             border-radius: 6px;
             font-size: 14px;
         }
         input:focus, select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #0056b3;
+            box-shadow: 0 0 5px rgba(0,86,179,0.3);
         }
         .btn {
-            background: #667eea;
-            color: white;
             padding: 10px 20px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
             font-weight: bold;
+            font-size: 14px;
         }
-        .btn:hover { background: #5a67d8; }
-        .btn-danger { background: #e53e3e; }
-        .btn-danger:hover { background: #c53030; }
-        .btn-success { background: #48bb78; }
-        .btn-success:hover { background: #38a169; }
-        .btn-warning { background: #ed8936; }
-        .btn-warning:hover { background: #dd6b20; }
+        .btn-primary { background: #0056b3; color: white; }
+        .btn-primary:hover { background: #004099; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .btn-action { padding: 4px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; border: none; }
+        .btn-edit { background: #ffc107; color: #333; }
+        .btn-edit:hover { background: #e0a800; }
+        .btn-delete { background: #dc3545; color: white; }
+        .btn-delete:hover { background: #c82333; }
+        
+        .table-wrapper {
+            max-height: 450px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            font-size: 13px;
         }
         th, td {
             border: 1px solid #ddd;
@@ -84,417 +113,547 @@
             text-align: left;
         }
         th {
-            background: #667eea;
+            background: #0056b3;
             color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        .action-buttons button {
-            padding: 4px 8px;
+        .badge-admin {
+            background: #c62828;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
             font-size: 11px;
         }
-        .info-note {
-            background: #fef5e7;
-            border-left: 4px solid #ed8936;
-            padding: 12px;
-            margin-top: 15px;
-            font-size: 13px;
-            border-radius: 6px;
+        .badge-agent {
+            background: #2e7d32;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
         }
+        .empty-row { text-align: center; color: #999; padding: 20px; }
+        
         .stats {
             display: flex;
             gap: 15px;
+            flex-wrap: wrap;
             margin-bottom: 20px;
         }
         .stat-box {
-            background: #f7fafc;
-            padding: 10px 15px;
+            background: #f8f9fa;
+            padding: 15px 25px;
             border-radius: 8px;
             flex: 1;
+            min-width: 120px;
             text-align: center;
         }
         .stat-number {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
-            color: #667eea;
+            color: #0056b3;
         }
         .stat-label {
             font-size: 12px;
             color: #666;
         }
-        .error {
-            color: #e53e3e;
-            font-size: 12px;
-            margin-top: 4px;
+        
+        .info-note {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 20px;
+            border-left: 4px solid #ffc107;
+        }
+        .info-note strong { color: #856404; }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8d7da;
+            border-radius: 6px;
             display: none;
         }
-        .success {
-            color: #38a169;
-            font-size: 12px;
-            margin-top: 4px;
+        .success-message {
+            color: #155724;
+            font-size: 13px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #d4edda;
+            border-radius: 6px;
             display: none;
+        }
+        
+        .edit-indicator {
+            background: #ffc107;
+            padding: 8px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .login-container h2 { text-align: center; color: #0056b3; margin-bottom: 20px; }
+        .login-container input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .login-container button { width: 100%; padding: 12px; background: #0056b3; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .login-container button:hover { background: #004099; }
+        .login-error { color: red; text-align: center; margin-top: 10px; display: none; }
+        .login-subtitle { text-align: center; font-size: 13px; color: #666; margin-bottom: 20px; }
+        
+        @media (max-width: 768px) {
+            .header { flex-direction: column; text-align: center; gap: 10px; }
+            .form-group { min-width: 100%; }
+            .stats { flex-direction: column; }
         }
     </style>
 </head>
 <body>
+
+<!-- PAGE DE CONNEXION ADMIN -->
+<div id="loginPage" class="login-container">
+    <h2>🔐 Administration</h2>
+    <div class="login-subtitle">Gestion des agents - AAPI</div>
+    <input type="text" id="loginUser" placeholder="Nom d'utilisateur">
+    <input type="password" id="loginPassword" placeholder="Mot de passe">
+    <button onclick="authentifier()">Se connecter</button>
+    <div id="loginError" class="login-error">❌ Identifiants incorrects</div>
+</div>
+
+<!-- APPLICATION ADMIN -->
+<div id="appContainer" style="display:none;">
 <div class="container">
-    <div class="card">
-        <h2>👥 Gestion des utilisateurs</h2>
-        <p style="color:#666; margin-bottom:20px;">Créer, modifier ou supprimer des comptes pour l'application Registre des visiteurs</p>
+    
+    <!-- En-tête -->
+    <div class="header">
+        <div>
+            <h1>👥 Administration</h1>
+            <div class="subtitle">Gestion des agents - AAPI</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <div class="user-info">👤 <strong id="currentUser">-</strong></div>
+            <button class="logout-btn" onclick="deconnecter()">🚪 Déconnexion</button>
+        </div>
+    </div>
+    
+    <!-- Statistiques -->
+    <div class="stats">
+        <div class="stat-box">
+            <div class="stat-number" id="totalAgents">0</div>
+            <div class="stat-label">Total agents</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number" id="totalAdmins">0</div>
+            <div class="stat-label">Administrateurs</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number" id="totalUsers">0</div>
+            <div class="stat-label">Agents</div>
+        </div>
+    </div>
+    
+    <!-- Formulaire -->
+    <div class="form-card">
+        <h2 id="formTitle">➕ Ajouter un agent</h2>
+        <div id="editIndicator" class="edit-indicator">✏️ MODIFICATION EN COURS</div>
         
-        <!-- Formulaire d'ajout/modification -->
-        <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 id="formTitle">➕ Ajouter un utilisateur</h3>
+        <div id="successMsg" class="success-message"></div>
+        <div id="errorMsg" class="error-message"></div>
+        
+        <form id="agentForm">
             <input type="hidden" id="editIndex" value="-1">
+            
             <div class="form-row">
                 <div class="form-group">
-                    <label>Nom d'utilisateur *</label>
-                    <input type="text" id="username" placeholder="Ex: dupont">
+                    <label>👤 Nom *</label>
+                    <input type="text" id="agentNom" placeholder="Nom de l'agent" required>
                 </div>
                 <div class="form-group">
-                    <label>Mot de passe *</label>
-                    <input type="password" id="password" placeholder="Mot de passe">
+                    <label>👤 Prénom *</label>
+                    <input type="text" id="agentPrenom" placeholder="Prénom de l'agent" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>🏢 Service *</label>
+                    <input type="text" id="agentService" placeholder="Service" required>
                 </div>
                 <div class="form-group">
-                    <label>Nom complet</label>
-                    <input type="text" id="fullname" placeholder="Ex: Jean Dupont">
+                    <label>📌 Direction *</label>
+                    <input type="text" id="agentDirection" placeholder="Direction" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>🔑 Nom d'utilisateur (login) *</label>
+                    <input type="text" id="agentLogin" placeholder="Ex: dupontj" required>
                 </div>
                 <div class="form-group">
-                    <label>Rôle *</label>
-                    <select id="role">
-                        <option value="user">👤 Utilisateur (consultation + ajout)</option>
-                        <option value="admin">👑 Administrateur (tous droits)</option>
-                    </select>
+                    <label>🔒 Mot de passe *</label>
+                    <input type="password" id="agentPassword" placeholder="Mot de passe" required>
                 </div>
             </div>
-            <div id="formError" class="error"></div>
-            <div id="formSuccess" class="success"></div>
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button class="btn" onclick="enregistrerUtilisateur()">💾 Enregistrer</button>
-                <button class="btn btn-warning" onclick="annulerEdition()" id="cancelBtn" style="display:none;">❌ Annuler</button>
+            
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary" id="submitBtn">💾 Enregistrer</button>
+                <button type="button" class="btn btn-secondary" id="cancelBtn" style="display:none;">❌ Annuler</button>
             </div>
-        </div>
-        
-        <!-- Statistiques -->
-        <div class="stats">
-            <div class="stat-box">
-                <div class="stat-number" id="totalUsers">0</div>
-                <div class="stat-label">Total utilisateurs</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-number" id="adminCount">0</div>
-                <div class="stat-label">Administrateurs</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-number" id="userCount">0</div>
-                <div class="stat-label">Utilisateurs</div>
-            </div>
-        </div>
-        
-        <!-- Liste des utilisateurs -->
-        <h3>📋 Liste des utilisateurs</h3>
-        <div style="overflow-x: auto;">
-            <table id="usersTable">
+        </form>
+    </div>
+    
+    <!-- Liste des agents -->
+    <div class="form-card">
+        <h2>📋 Liste des agents</h2>
+        <div class="table-wrapper">
+            <table>
                 <thead>
                     <tr>
-                        <th>Nom d'utilisateur</th>
-                        <th>Nom complet</th>
+                        <th style="width:70px">Actions</th>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Service</th>
+                        <th>Direction</th>
+                        <th>Login</th>
                         <th>Rôle</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="usersTableBody">
-                    <tr><td colspan="4" style="text-align:center;">Chargement...</td></tr>
-                </tbody>
+                <tbody id="agentsTableBody"></tbody>
             </table>
         </div>
         
         <div class="info-note">
             <strong>ℹ️ Informations :</strong><br>
-            • Les utilisateurs sont stockés dans le localStorage de votre navigateur.<br>
-            • Pour distribuer l'application avec ces utilisateurs, copiez le code de la page principale après avoir créé les comptes.<br>
-            • Mot de passe par défaut recommandé : <strong>user123</strong> pour les utilisateurs, <strong>admin123</strong> pour l'admin.
+            • L'administrateur par défaut (<strong>admin</strong>) ne peut pas être modifié ni supprimé.<br>
+            • Les agents créés apparaîtront automatiquement dans l'application de visite.<br>
+            • Le mot de passe peut être modifié à tout moment.
         </div>
         
-        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: space-between;">
-            <button class="btn btn-success" onclick="exporterUtilisateurs()">📎 Exporter les utilisateurs</button>
-            <button class="btn btn-warning" onclick="importerUtilisateurs()">📂 Importer des utilisateurs</button>
-            <button class="btn btn-danger" onclick="reinitialiserDefauts()">🔄 Réinitialiser utilisateurs par défaut</button>
+        <div class="btn-group" style="margin-top: 15px;">
+            <button class="btn btn-success" onclick="exporterAgents()">📎 Exporter la liste</button>
+            <button class="btn btn-warning" onclick="importerAgents()">📂 Importer une liste</button>
         </div>
     </div>
     
-    <div class="card">
-        <h2>🔐 Intégration dans l'application principale</h2>
-        <p>Pour ajouter ces utilisateurs à l'application principale, copiez le code JSON ci-dessous :</p>
-        <textarea id="exportJson" rows="6" style="width:100%; font-family: monospace; font-size: 12px;" readonly></textarea>
-        <button class="btn" onclick="copierJson()" style="margin-top: 10px;">📋 Copier le code</button>
-        <p class="info-note" style="margin-top: 10px;">
-            <strong>Comment intégrer ?</strong><br>
-            1. Copiez le JSON ci-dessus<br>
-            2. Ouvrez l'application principale (Registre des visiteurs)<br>
-            3. Ouvrez la console (F12)<br>
-            4. Collez le code suivant :<br>
-            <code style="background:#f0f0f0; padding:5px; display:block;">localStorage.setItem('utilisateurs', 'LE_JSON_COPIÉ'); location.reload();</code>
-        </p>
-    </div>
+</div>
 </div>
 
 <script>
-    // Utilisateurs par défaut
-    const utilisateursDefaut = {
-        'admin': { password: 'admin123', role: 'admin', name: 'Administrateur' },
-        'user': { password: 'user123', role: 'user', name: 'Utilisateur' }
+    // ==================== CHARGEMENT DES AGENTS ====================
+    let agents = [];
+    let currentUser = null;
+    let editMode = false;
+    
+    const adminDefaut = {
+        nom: 'Administrateur',
+        prenom: 'AAPI',
+        service: 'Administration',
+        direction: 'Direction Générale',
+        login: 'admin',
+        password: 'admin123',
+        role: 'admin'
     };
     
-    // Charger les utilisateurs depuis localStorage
-    function chargerUtilisateurs() {
-        const saved = localStorage.getItem('utilisateurs');
+    function chargerAgents() {
+        const saved = localStorage.getItem('agents_aapi');
         if (saved) {
-            return JSON.parse(saved);
+            agents = JSON.parse(saved);
+            if (!agents.find(a => a.login === 'admin')) {
+                agents.unshift(adminDefaut);
+                localStorage.setItem('agents_aapi', JSON.stringify(agents));
+            }
         } else {
-            localStorage.setItem('utilisateurs', JSON.stringify(utilisateursDefaut));
-            return utilisateursDefaut;
+            agents = [adminDefaut];
+            localStorage.setItem('agents_aapi', JSON.stringify(agents));
         }
+        return agents;
     }
     
-    let utilisateurs = chargerUtilisateurs();
-    let editMode = false;
-    let editUsername = null;
-    
-    // Sauvegarder utilisateurs
-    function sauvegarderUtilisateurs() {
-        localStorage.setItem('utilisateurs', JSON.stringify(utilisateurs));
+    function sauvegarderAgents() {
+        localStorage.setItem('agents_aapi', JSON.stringify(agents));
         afficherListe();
         mettreAJourStats();
     }
     
-    // Afficher la liste
+    // ==================== AFFICHAGE ====================
     function afficherListe() {
-        const tbody = document.getElementById('usersTableBody');
+        const tbody = document.getElementById('agentsTableBody');
         tbody.innerHTML = '';
         
-        if (Object.keys(utilisateurs).length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Aucun utilisateur</td></tr>';
+        if (agents.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="empty-row">Aucun agent enregistré</td></tr>`;
             return;
         }
         
-        for (const [username, data] of Object.entries(utilisateurs)) {
-            const row = tbody.insertRow();
-            row.insertCell(0).innerText = username;
-            row.insertCell(1).innerText = data.name || '—';
-            row.insertCell(2).innerHTML = data.role === 'admin' ? 
-                '<span style="background:#c62828; color:white; padding:2px 8px; border-radius:20px; font-size:11px;">👑 Admin</span>' : 
-                '<span style="background:#2e7d32; color:white; padding:2px 8px; border-radius:20px; font-size:11px;">👤 Utilisateur</span>';
+        agents.forEach((a, idx) => {
+            const isAdmin = a.role === 'admin';
+            const isCurrent = currentUser && currentUser.login === a.login;
             
-            const actions = row.insertCell(3);
-            actions.className = 'action-buttons';
-            actions.innerHTML = `
-                <button class="btn btn-warning" onclick="editerUtilisateur('${username}')" style="padding:4px 12px;">✏️ Modifier</button>
-                <button class="btn btn-danger" onclick="supprimerUtilisateur('${username}')" style="padding:4px 12px;">🗑️ Supprimer</button>
-            `;
-        }
-        
-        // Mettre à jour l'export JSON
-        document.getElementById('exportJson').value = JSON.stringify(utilisateurs, null, 2);
+            tbody.innerHTML += `<tr>
+                <td class="btn-group" style="gap:5px; margin:0;">
+                    <button class="btn-action btn-edit" onclick="editerAgent(${idx})" ${isAdmin ? 'disabled style="opacity:0.5;"' : ''}>✏️</button>
+                    <button class="btn-action btn-delete" onclick="supprimerAgent(${idx})" ${isAdmin ? 'disabled style="opacity:0.5;"' : ''}>🗑️</button>
+                </td>
+                <td>${a.nom || ''}</td>
+                <td>${a.prenom || ''}</td>
+                <td>${a.service || ''}</td>
+                <td>${a.direction || ''}</td>
+                <td>${a.login || ''} ${isCurrent ? '👈 vous' : ''}</td>
+                <td>${isAdmin ? '<span class="badge-admin">👑 Admin</span>' : '<span class="badge-agent">👤 Agent</span>'}</td>
+            </tr>`;
+        });
     }
     
-    // Mettre à jour les stats
     function mettreAJourStats() {
-        const total = Object.keys(utilisateurs).length;
-        const adminCount = Object.values(utilisateurs).filter(u => u.role === 'admin').length;
-        const userCount = Object.values(utilisateurs).filter(u => u.role === 'user').length;
-        
-        document.getElementById('totalUsers').innerText = total;
-        document.getElementById('adminCount').innerText = adminCount;
-        document.getElementById('userCount').innerText = userCount;
+        const total = agents.length;
+        const admins = agents.filter(a => a.role === 'admin').length;
+        const users = agents.filter(a => a.role === 'user').length;
+        document.getElementById('totalAgents').innerText = total;
+        document.getElementById('totalAdmins').innerText = admins;
+        document.getElementById('totalUsers').innerText = users;
     }
     
-    // Valider le nom d'utilisateur
-    function validerUsername(username) {
-        if (!username || username.trim() === '') return false;
-        if (!/^[a-zA-Z0-9_-]+$/.test(username)) return false;
-        return true;
+    // ==================== AUTHENTIFICATION ====================
+    function authentifier() {
+        const login = document.getElementById('loginUser').value.trim().toLowerCase();
+        const pwd = document.getElementById('loginPassword').value;
+        
+        const agent = agents.find(a => a.login === login && a.password === pwd);
+        if (agent && agent.role === 'admin') {
+            currentUser = agent;
+            localStorage.setItem('currentUserAdmin', login);
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            document.getElementById('currentUser').innerText = `${agent.prenom} ${agent.nom}`;
+            afficherListe();
+            mettreAJourStats();
+            resetInactivityTimer();
+            document.getElementById('loginUser').value = '';
+            document.getElementById('loginPassword').value = '';
+        } else {
+            document.getElementById('loginError').style.display = 'block';
+        }
     }
     
-    // Enregistrer utilisateur
-    function enregistrerUtilisateur() {
-        const username = document.getElementById('username').value.trim().toLowerCase();
-        const password = document.getElementById('password').value;
-        const fullname = document.getElementById('fullname').value.trim();
-        const role = document.getElementById('role').value;
+    function deconnecter() {
+        localStorage.removeItem('currentUserAdmin');
+        currentUser = null;
+        document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('loginPage').style.display = 'block';
+        clearTimeout(inactivityTimer);
+    }
+    
+    function checkSession() {
+        chargerAgents();
+        const saved = localStorage.getItem('currentUserAdmin');
+        if (saved) {
+            const agent = agents.find(a => a.login === saved && a.role === 'admin');
+            if (agent) {
+                currentUser = agent;
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                document.getElementById('currentUser').innerText = `${agent.prenom} ${agent.nom}`;
+                afficherListe();
+                mettreAJourStats();
+                resetInactivityTimer();
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    // ==================== DÉCONNEXION AUTOMATIQUE ====================
+    let inactivityTimer;
+    const INACTIVITY_DELAY = 5 * 60 * 1000;
+    
+    function resetInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            if (currentUser) {
+                const stay = confirm('🔐 Inactivité prolongée (5 minutes).\nVoulez-vous rester connecté ?');
+                if (stay) resetInactivityTimer();
+                else deconnecter();
+            }
+        }, INACTIVITY_DELAY);
+    }
+    
+    document.addEventListener('mousemove', () => { if (currentUser) resetInactivityTimer(); });
+    document.addEventListener('keydown', () => { if (currentUser) resetInactivityTimer(); });
+    document.addEventListener('click', () => { if (currentUser) resetInactivityTimer(); });
+    
+    // ==================== CRUD AGENTS ====================
+    function enregistrerAgent(e) {
+        if (e) e.preventDefault();
         
-        const errorDiv = document.getElementById('formError');
-        const successDiv = document.getElementById('formSuccess');
+        const nom = document.getElementById('agentNom').value.trim().toUpperCase();
+        const prenom = document.getElementById('agentPrenom').value.trim().toUpperCase();
+        const service = document.getElementById('agentService').value.trim();
+        const direction = document.getElementById('agentDirection').value.trim();
+        const login = document.getElementById('agentLogin').value.trim().toLowerCase();
+        const password = document.getElementById('agentPassword').value;
+        
+        const errorDiv = document.getElementById('errorMsg');
+        const successDiv = document.getElementById('successMsg');
         errorDiv.style.display = 'none';
         successDiv.style.display = 'none';
         
-        // Vérifications
-        if (!validerUsername(username)) {
-            errorDiv.innerText = 'Nom d\'utilisateur invalide (lettres, chiffres, _ et - uniquement)';
+        if (!nom || !prenom || !service || !direction || !login || !password) {
+            errorDiv.innerText = 'Veuillez remplir tous les champs obligatoires (*)';
             errorDiv.style.display = 'block';
             return;
         }
         
-        if (!editMode && utilisateurs[username]) {
-            errorDiv.innerText = 'Ce nom d\'utilisateur existe déjà';
-            errorDiv.style.display = 'block';
-            return;
-        }
+        const editIdx = parseInt(document.getElementById('editIndex').value);
         
-        if (!password && !editMode) {
-            errorDiv.innerText = 'Le mot de passe est requis';
-            errorDiv.style.display = 'block';
-            return;
-        }
-        
-        // Création ou modification
-        if (editMode && editUsername) {
-            // Ne pas écraser l'admin par défaut si on modifie son nom
-            if (editUsername !== username && utilisateurs[username] && utilisateurs[username] !== editUsername) {
+        if (editIdx >= 0 && editIdx < agents.length) {
+            if (agents[editIdx].role === 'admin') {
+                errorDiv.innerText = 'Le compte administrateur ne peut pas être modifié';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            const existing = agents.findIndex((a, i) => a.login === login && i !== editIdx);
+            if (existing !== -1) {
                 errorDiv.innerText = 'Ce nom d\'utilisateur existe déjà';
                 errorDiv.style.display = 'block';
                 return;
             }
-            
-            // Supprimer l'ancien
-            const oldData = utilisateurs[editUsername];
-            delete utilisateurs[editUsername];
-            
-            // Créer le nouveau
-            utilisateurs[username] = {
-                password: password || oldData.password,
-                role: role,
-                name: fullname || oldData.name
-            };
-            
-            successDiv.innerText = '✏️ Utilisateur modifié avec succès';
+            agents[editIdx] = { ...agents[editIdx], nom, prenom, service, direction, login, password };
+            successDiv.innerText = '✏️ Agent modifié avec succès';
             successDiv.style.display = 'block';
-            annulerEdition();
         } else {
-            // Nouvel utilisateur
-            utilisateurs[username] = {
-                password: password,
-                role: role,
-                name: fullname
-            };
-            successDiv.innerText = '✅ Utilisateur créé avec succès';
+            if (agents.find(a => a.login === login)) {
+                errorDiv.innerText = 'Ce nom d\'utilisateur existe déjà';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            agents.push({ nom, prenom, service, direction, login, password, role: 'user' });
+            successDiv.innerText = '✅ Agent créé avec succès';
             successDiv.style.display = 'block';
-            
-            // Réinitialiser formulaire
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            document.getElementById('fullname').value = '';
-            document.getElementById('role').value = 'user';
         }
         
-        sauvegarderUtilisateurs();
+        sauvegarderAgents();
+        annulerEdition();
+        resetForm();
         
         setTimeout(() => { successDiv.style.display = 'none'; }, 3000);
     }
     
-    // Éditer un utilisateur
-    function editerUtilisateur(username) {
-        const user = utilisateurs[username];
-        if (!user) return;
-        
-        editMode = true;
-        editUsername = username;
-        
-        document.getElementById('formTitle').innerHTML = '✏️ Modifier l\'utilisateur';
-        document.getElementById('username').value = username;
-        document.getElementById('username').disabled = true;
-        document.getElementById('password').value = '';
-        document.getElementById('password').placeholder = 'Laisser vide pour garder l\'ancien';
-        document.getElementById('fullname').value = user.name || '';
-        document.getElementById('role').value = user.role;
-        document.getElementById('cancelBtn').style.display = 'inline-block';
-        
-        document.getElementById('formSuccess').style.display = 'none';
-        document.getElementById('formError').style.display = 'none';
-        
-        document.querySelector('#formTitle').scrollIntoView({ behavior: 'smooth' });
-    }
-    
-    // Supprimer un utilisateur
-    function supprimerUtilisateur(username) {
-        if (username === 'admin') {
-            alert('⚠️ Impossible de supprimer le compte administrateur principal');
+    function editerAgent(idx) {
+        const a = agents[idx];
+        if (a.role === 'admin') {
+            alert('Le compte administrateur ne peut pas être modifié');
             return;
         }
         
-        if (confirm(`Supprimer définitivement l'utilisateur "${username}" ?`)) {
-            delete utilisateurs[username];
-            sauvegarderUtilisateurs();
-            
-            if (editMode && editUsername === username) {
-                annulerEdition();
-            }
-            
-            document.getElementById('formSuccess').innerText = '🗑️ Utilisateur supprimé';
-            document.getElementById('formSuccess').style.display = 'block';
-            setTimeout(() => { document.getElementById('formSuccess').style.display = 'none'; }, 3000);
+        editMode = true;
+        document.getElementById('editIndex').value = idx;
+        document.getElementById('editIndicator').style.display = 'block';
+        document.getElementById('cancelBtn').style.display = 'inline-block';
+        document.getElementById('formTitle').innerHTML = '✏️ Modifier un agent';
+        document.getElementById('submitBtn').style.background = '#ffc107';
+        document.getElementById('submitBtn').innerHTML = '✏️ Mettre à jour';
+        
+        document.getElementById('agentNom').value = a.nom || '';
+        document.getElementById('agentPrenom').value = a.prenom || '';
+        document.getElementById('agentService').value = a.service || '';
+        document.getElementById('agentDirection').value = a.direction || '';
+        document.getElementById('agentLogin').value = a.login || '';
+        document.getElementById('agentPassword').value = '';
+        document.getElementById('agentPassword').placeholder = 'Laisser vide pour garder l\'ancien';
+        
+        document.getElementById('errorMsg').style.display = 'none';
+        document.getElementById('successMsg').style.display = 'none';
+        
+        document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function supprimerAgent(idx) {
+        const a = agents[idx];
+        if (a.role === 'admin') {
+            alert('Le compte administrateur ne peut pas être supprimé');
+            return;
+        }
+        if (confirm(`Supprimer l'agent "${a.nom} ${a.prenom}" ?`)) {
+            agents.splice(idx, 1);
+            sauvegarderAgents();
+            if (editMode) annulerEdition();
+            document.getElementById('successMsg').innerText = '🗑️ Agent supprimé';
+            document.getElementById('successMsg').style.display = 'block';
+            setTimeout(() => { document.getElementById('successMsg').style.display = 'none'; }, 3000);
         }
     }
     
-    // Annuler l'édition
     function annulerEdition() {
         editMode = false;
-        editUsername = null;
-        
-        document.getElementById('formTitle').innerHTML = '➕ Ajouter un utilisateur';
-        document.getElementById('username').disabled = false;
-        document.getElementById('username').value = '';
-        document.getElementById('password').value = '';
-        document.getElementById('password').placeholder = 'Mot de passe';
-        document.getElementById('fullname').value = '';
-        document.getElementById('role').value = 'user';
+        document.getElementById('editIndex').value = '-1';
+        document.getElementById('editIndicator').style.display = 'none';
         document.getElementById('cancelBtn').style.display = 'none';
-        document.getElementById('formError').style.display = 'none';
-        document.getElementById('formSuccess').style.display = 'none';
+        document.getElementById('formTitle').innerHTML = '➕ Ajouter un agent';
+        document.getElementById('submitBtn').style.background = '#0056b3';
+        document.getElementById('submitBtn').innerHTML = '💾 Enregistrer';
+        resetForm();
     }
     
-    // Exporter les utilisateurs
-    function exporterUtilisateurs() {
-        const json = JSON.stringify(utilisateurs, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
+    function resetForm() {
+        document.getElementById('agentNom').value = '';
+        document.getElementById('agentPrenom').value = '';
+        document.getElementById('agentService').value = '';
+        document.getElementById('agentDirection').value = '';
+        document.getElementById('agentLogin').value = '';
+        document.getElementById('agentPassword').value = '';
+        document.getElementById('agentPassword').placeholder = 'Mot de passe';
+        document.getElementById('errorMsg').style.display = 'none';
+        document.getElementById('successMsg').style.display = 'none';
+    }
+    
+    document.getElementById('cancelBtn').addEventListener('click', annulerEdition);
+    document.getElementById('agentForm').addEventListener('submit', enregistrerAgent);
+    
+    // ==================== EXPORT / IMPORT ====================
+    function exporterAgents() {
+        const data = JSON.stringify(agents, null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
         const a = document.createElement('a');
-        a.href = url;
-        a.download = 'utilisateurs.json';
+        a.href = URL.createObjectURL(blob);
+        a.download = 'agents_aapi.json';
         a.click();
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(a.href);
     }
     
-    // Importer des utilisateurs
-    function importerUtilisateurs() {
+    function importerAgents() {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.json';
         input.onchange = function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            
             const reader = new FileReader();
-            reader.onload = function(evt) {
+            reader.onload = function(ev) {
                 try {
-                    const imported = JSON.parse(evt.target.result);
-                    const importer = confirm(`Importer ${Object.keys(imported).length} utilisateurs ? Cela remplacera tous les utilisateurs actuels.`);
-                    if (importer) {
-                        // Vérifier qu'il y a au moins un admin
-                        let hasAdmin = false;
-                        for (const [u, data] of Object.entries(imported)) {
-                            if (data.role === 'admin') hasAdmin = true;
-                        }
-                        if (!hasAdmin) {
-                            alert('⚠️ Le fichier ne contient aucun administrateur. Au moins un admin est requis.');
-                            return;
-                        }
-                        utilisateurs = imported;
-                        sauvegarderUtilisateurs();
+                    const imported = JSON.parse(ev.target.result);
+                    if (!Array.isArray(imported)) throw new Error('Format invalide');
+                    const hasAdmin = imported.some(a => a.role === 'admin');
+                    if (!hasAdmin) {
+                        alert('Le fichier doit contenir au moins un administrateur');
+                        return;
+                    }
+                    if (confirm(`Importer ${imported.length} agents ? Les données actuelles seront remplacées.`)) {
+                        agents = imported;
+                        sauvegarderAgents();
                         annulerEdition();
-                        alert(`✅ ${Object.keys(utilisateurs).length} utilisateurs importés`);
+                        alert(`✅ ${agents.length} agents importés`);
                     }
                 } catch(err) {
                     alert('Fichier invalide');
@@ -505,29 +664,11 @@
         input.click();
     }
     
-    // Réinitialiser aux utilisateurs par défaut
-    function reinitialiserDefauts() {
-        if (confirm('Réinitialiser aux utilisateurs par défaut (admin/user) ? Tous les utilisateurs créés seront perdus.')) {
-            utilisateurs = JSON.parse(JSON.stringify(utilisateursDefaut));
-            sauvegarderUtilisateurs();
-            annulerEdition();
-            alert('✅ Réinitialisation effectuée');
-        }
+    // ==================== INITIALISATION ====================
+    if (!checkSession()) {
+        document.getElementById('loginPage').style.display = 'block';
+        document.getElementById('appContainer').style.display = 'none';
     }
-    
-    // Copier le JSON dans le presse-papier
-    function copierJson() {
-        const json = document.getElementById('exportJson').value;
-        navigator.clipboard.writeText(json).then(() => {
-            alert('✅ Code JSON copié !');
-        }).catch(() => {
-            alert('❌ Impossible de copier');
-        });
-    }
-    
-    // Initialisation
-    afficherListe();
-    mettreAJourStats();
 </script>
 </body>
 </html>

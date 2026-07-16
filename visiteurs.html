@@ -2,13 +2,12 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Registre des visiteurs - CNRC AAPI Sidi bel Abbès</title>
+    <title>Registre des visiteurs - AAPI</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #e9ecef; margin: 0; padding: 20px; min-height: 100vh; }
-        .container { max-width: 1500px; margin: auto; }
+        .container { max-width: 1400px; margin: auto; }
         
-        /* Page de connexion */
         .login-container {
             max-width: 400px;
             margin: 100px auto;
@@ -23,7 +22,6 @@
         .login-container button:hover { background: #004099; }
         .login-error { color: red; text-align: center; margin-top: 10px; display: none; }
         
-        /* En-tête utilisateur */
         .user-info {
             background: #e8f4fd;
             padding: 10px 15px;
@@ -41,7 +39,6 @@
         .logout-btn { background: #dc3545; padding: 5px 12px; border-radius: 6px; color: white; cursor: pointer; font-size: 12px; }
         .logout-btn:hover { background: #c82333; }
         
-        /* Cartes formulaire */
         .form-card {
             background: white;
             border-radius: 12px;
@@ -51,15 +48,7 @@
         }
         .form-card h2 { color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-top: 0; text-align: center; }
         .sous-titre { text-align: center; color: #666; font-size: 14px; margin-top: -10px; margin-bottom: 20px; }
-        .import-card {
-            background: #e8f4fd;
-            border: 1px dashed #0056b3;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .import-status { margin-top: 10px; font-size: 13px; }
+        
         .form-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; }
         .form-group { flex: 1; min-width: 200px; }
         .full-width { flex: 100%; }
@@ -74,50 +63,54 @@
         input:focus, select:focus, textarea:focus { outline: none; border-color: #0056b3; box-shadow: 0 0 5px rgba(0,86,179,0.3); }
         textarea { resize: vertical; font-family: inherit; }
         
-        /* Boutons */
         .btn { background: #0056b3; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
         .btn:hover { background: #004099; }
-        .btn-action { padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; border: none; }
-        .btn-edit { background: #ffc107; color: #333; }
-        .btn-edit:hover { background: #e0a800; }
-        .btn-delete { background: #dc3545; color: white; }
-        .btn-delete:hover { background: #c82333; }
         .btn-success { background: #28a745; }
         .btn-success:hover { background: #1e7e34; }
-        .btn-excel { background: #1f7b3a; }
-        .btn-excel:hover { background: #16632e; }
-        .btn-warning { background: #ffc107; color: #333; }
-        .btn-warning:hover { background: #e0a800; }
         .btn-secondary { background: #6c757d; }
         .btn-secondary:hover { background: #5a6268; }
-        .btn-info { background: #17a2b8; }
-        .btn-info:hover { background: #138496; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-warning:hover { background: #e0a800; }
         
-        /* Statistiques */
-        .stats-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px; }
-        .stats-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-        .stat-box { background: #f8f9fa; border-radius: 10px; padding: 15px; text-align: center; min-width: 120px; }
-        .stat-number { font-size: 28px; font-weight: bold; color: #0056b3; }
-        .stat-label { font-size: 12px; color: #666; }
-        .stat-filters { display: flex; gap: 10px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; }
-        .stat-filters .form-group { margin-bottom: 0; min-width: 150px; }
+        .btn-action { padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; border: none; }
+        .btn-edit { background: #ffc107; color: #333; }
+        .btn-delete { background: #dc3545; color: white; }
+        .action-buttons { display: flex; gap: 4px; white-space: nowrap; }
         
-        /* Tableau */
-        .list-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 30px; }
-        .list-card h3 { margin-top: 0; color: #0056b3; }
+        .agent-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .agent-info .row { display: flex; gap: 15px; flex-wrap: wrap; }
+        .agent-info .item { flex: 1; min-width: 150px; }
+        .agent-info .label { font-size: 11px; color: #666; }
+        .agent-info .value { font-weight: bold; color: #0056b3; font-size: 14px; }
+        
         .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
         .search-bar input { flex: 1; }
         .search-icon, .clear-search { padding: 10px 15px; border-radius: 8px; cursor: pointer; background: #0056b3; color: white; text-align: center; }
         .clear-search { background: #6c757d; }
-        .table-wrapper { max-height: 450px; overflow-y: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th, td { border: 1px solid #ddd; padding: 6px; text-align: left; vertical-align: top; }
-        th { background: #0056b3; color: white; position: sticky; top: 0; }
-        .btn-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
-        .badge-count { background: #28a745; color: white; padding: 2px 8px; border-radius: 20px; font-size: 11px; margin-left: 10px; }
-        .action-buttons { display: flex; gap: 4px; white-space: nowrap; }
+        .search-info { font-size: 12px; margin-bottom: 10px; display: none; }
         
-        /* Auto-complétion */
+        .table-wrapper { max-height: 400px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
+        th { background: #0056b3; color: white; position: sticky; top: 0; }
+        .badge-count { background: #28a745; color: white; padding: 2px 8px; border-radius: 20px; font-size: 11px; margin-left: 10px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .stats-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .stat-box { background: #f8f9fa; border-radius: 10px; padding: 15px; text-align: center; min-width: 120px; }
+        .stat-number { font-size: 28px; font-weight: bold; color: #0056b3; }
+        .stat-label { font-size: 12px; color: #666; }
+        
+        .info-format { font-size: 11px; color: #666; margin-top: 4px; }
+        .info-note { background: #fff3cd; padding: 10px; border-radius: 6px; font-size: 12px; margin-top: 15px; text-align: center; }
+        .edit-mode-indicator { background: #ffc107; padding: 8px; border-radius: 6px; text-align: center; display: none; margin-bottom: 15px; }
+        .error { color: red; font-size: 12px; display: none; }
+        .search-result { background: #d4edda; border: 1px solid #c3e6cb; padding: 8px; border-radius: 6px; margin-top: 5px; font-size: 12px; display: none; }
         .relative { position: relative; }
         .code-suggestions {
             position: absolute;
@@ -130,19 +123,15 @@
             border: 1px solid #ccc;
             border-radius: 6px;
             z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .suggestion-item { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 12px; }
         .suggestion-item:hover { background: #0056b3; color: white; }
-        .suggestion-code { font-weight: bold; font-family: monospace; }
-        .search-result { background: #d4edda; border: 1px solid #c3e6cb; padding: 8px; border-radius: 6px; margin-top: 5px; font-size: 12px; display: none; }
-        .error { color: red; font-size: 12px; display: none; }
-        .info-format { font-size: 11px; color: #666; margin-top: 4px; }
-        .info-note { background: #fff3cd; padding: 10px; border-radius: 6px; font-size: 12px; margin-top: 15px; text-align: center; }
-        .observation-generale { background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-top: 10px; }
-        .edit-mode-indicator { background: #ffc107; padding: 8px; border-radius: 6px; text-align: center; display: none; margin-bottom: 15px; }
+        .import-card { background: #e8f4fd; border: 1px dashed #0056b3; border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center; }
+        .import-status { margin-top: 10px; font-size: 13px; }
         hr { margin: 15px 0; border: none; border-top: 1px solid #ddd; }
-        .search-info { font-size: 12px; margin-bottom: 10px; display: none; }
+        .observation-generale { background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-top: 10px; }
+        
+        @media (max-width: 768px) { .form-group { min-width: 100%; } }
     </style>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -151,7 +140,7 @@
 <!-- PAGE DE CONNEXION -->
 <div id="loginPage" class="login-container">
     <h2>🔐 Registre des visiteurs</h2>
-    <div style="text-align:center; font-size:13px; color:#666; margin-bottom:20px;">CNRC - AAPI Sidi bel Abbès</div>
+    <div style="text-align:center; font-size:13px; color:#666; margin-bottom:20px;">AAPI - Agence Nationale de Promotion de l'Investissement</div>
     <input type="text" id="loginUser" placeholder="Nom d'utilisateur">
     <input type="password" id="loginPassword" placeholder="Mot de passe">
     <button onclick="authentifier()">Se connecter</button>
@@ -163,13 +152,24 @@
 <div class="container">
     <div class="user-info">
         <div>👤 <strong id="currentUser"></strong> <span id="currentUserRole" class="role"></span></div>
-        <div class="logout-btn" onclick="deconnecter()">🚪 Déconnexion</div>
+        <div>
+            <a href="admin.html" target="_blank" style="color:#0056b3; text-decoration:none; margin-right:15px; font-size:13px;">⚙️ Administration</a>
+            <span class="logout-btn" onclick="deconnecter()">🚪 Déconnexion</span>
+        </div>
     </div>
     
-    <!-- Formulaire d'enregistrement -->
     <div class="form-card">
         <h2>📋 Enregistrement Visiteur</h2>
-        <div class="sous-titre">Représentant du CNRC à l'AAPI - Sidi bel Abbès</div>
+        <div class="sous-titre">AAPI - Agence Nationale de Promotion de l'Investissement</div>
+        
+        <div class="agent-info" id="agentInfo">
+            <div class="row">
+                <div class="item"><div class="label">👤 Agent</div><div class="value" id="agentNom">-</div></div>
+                <div class="item"><div class="label">🏢 Service</div><div class="value" id="agentService">-</div></div>
+                <div class="item"><div class="label">📌 Direction</div><div class="value" id="agentDirection">-</div></div>
+            </div>
+        </div>
+        
         <div id="editModeIndicator" class="edit-mode-indicator">✏️ MODE ÉDITION - Modification en cours</div>
         
         <div class="import-card">
@@ -184,7 +184,7 @@
             
             <div class="form-row">
                 <div class="form-group"><label>📅 Date de la visite</label><input type="date" id="dateVisite"></div>
-                <div class="form-group"><label>👤 Nom et Prénom</label><input type="text" id="nomPrenom" placeholder="Ex: DUPONT Jean"></div>
+                <div class="form-group"><label>👤 Nom et Prénom du visiteur</label><input type="text" id="nomPrenom" placeholder="Ex: DUPONT Jean"></div>
             </div>
             <div class="form-row">
                 <div class="form-group"><label>📅 Date de naissance</label><input type="date" id="dateNaissance"></div>
@@ -207,8 +207,8 @@
                 <div class="form-group">
                     <label>🔢 N° Registre de commerce</label>
                     <input type="text" id="numRC" placeholder="Ex: 01A123456789">
-                    <div class="info-format" id="rcFormatInfo">Format: 2 chiffres + A + 9 chiffres (/22 auto)</div>
-                    <div id="rcError" class="error">Format invalide</div>
+                    <div class="info-format" id="rcFormatInfo">Format: 2 chiffres + A ou B + 9 chiffres (ex: 01A123456789)</div>
+                    <div id="rcError" class="error">Format invalide. Exemple: 01A123456789 (2 chiffres + A/B + 9 chiffres)</div>
                 </div>
             </div>
             
@@ -240,7 +240,7 @@
             
             <div id="inscriptionRCFields" style="display:none;">
                 <div class="form-row">
-                    <div class="form-group"><label>🔢 N° RC (inscription)</label><input type="text" id="numRCInscription" placeholder="Ex: 01A123456789"></div>
+                    <div class="form-group"><label>🔢 N° RC (pour inscription)</label><input type="text" id="numRCInscription" placeholder="Ex: 01A123456789"></div>
                     <div class="form-group">
                         <label>🔍 Code activité</label>
                         <div class="relative">
@@ -288,20 +288,20 @@
     </div>
     
     <!-- Statistiques -->
-    <div class="stats-card">
-        <h3>📊 Statistiques par motif</h3>
-        <div class="stat-filters">
-            <div class="form-group"><label>Date début</label><input type="date" id="statsDateDebut"></div>
-            <div class="form-group"><label>Date fin</label><input type="date" id="statsDateFin"></div>
-            <div><button class="btn btn-info" onclick="calculerStatistiques()">📈 Calculer</button></div>
+    <div class="form-card" style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1); margin-bottom:30px;">
+        <h3 style="margin-top:0; color:#0056b3;">📊 Statistiques par motif</h3>
+        <div style="display:flex; gap:10px; margin-bottom:20px; align-items:flex-end; flex-wrap:wrap;">
+            <div class="form-group" style="flex:1; min-width:150px; margin-bottom:0;"><label>Date début</label><input type="date" id="statsDateDebut"></div>
+            <div class="form-group" style="flex:1; min-width:150px; margin-bottom:0;"><label>Date fin</label><input type="date" id="statsDateFin"></div>
+            <div><button class="btn btn-secondary" onclick="calculerStatistiques()" style="background:#17a2b8;">📈 Calculer</button></div>
         </div>
         <div id="statsResultat" class="stats-container"></div>
         <div id="statsDetail" style="margin-top:10px; font-size:12px; text-align:center;"></div>
     </div>
     
     <!-- Liste des visiteurs -->
-    <div class="list-card">
-        <h3>📊 Visiteurs enregistrés <span id="nbVisiteurs" class="badge-count">0</span></h3>
+    <div class="form-card" style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1); margin-bottom:30px;">
+        <h3 style="margin-top:0; color:#0056b3;">📊 Visiteurs enregistrés <span id="nbVisiteurs" class="badge-count">0</span></h3>
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="🔍 Rechercher par nom...">
             <span class="search-icon">🔍</span>
@@ -311,14 +311,30 @@
         <div class="table-wrapper">
             <table id="tableVisiteurs">
                 <thead>
-                    <tr><th style="width:70px">Actions</th><th>Date</th><th>Visiteur</th><th>Naiss.</th><th>Lieu</th><th>Statut</th><th>Société</th><th>N° RC</th><th>Motif</th><th>Type Ins.</th><th>N° RC Ins.</th><th>Code</th><th>Libellé</th><th>N° Dén.</th><th>Libellé Dén.</th><th>Obs.</th></tr>
+                    <tr>
+                        <th style="width:70px">Actions</th>
+                        <th>Agent</th>
+                        <th>Service</th>
+                        <th>Date</th>
+                        <th>Visiteur</th>
+                        <th>Naiss.</th>
+                        <th>Lieu</th>
+                        <th>Statut</th>
+                        <th>Société</th>
+                        <th>N° RC</th>
+                        <th>Motif</th>
+                        <th>Type Ins.</th>
+                        <th>Code</th>
+                        <th>Libellé</th>
+                        <th>Obs.</th>
+                    </tr>
                 </thead>
                 <tbody></tbody>
             </table>
         </div>
         <div class="btn-group">
             <button class="btn btn-success" onclick="exporterCSV()">📎 Exporter CSV</button>
-            <button class="btn btn-excel" onclick="exporterExcel()">📊 Exporter Excel</button>
+            <button class="btn btn-success" onclick="exporterExcel()" style="background:#1f7b3a;">📊 Exporter Excel</button>
             <button class="btn btn-warning" onclick="importerExcel()">📂 Importer Excel</button>
             <button class="btn btn-secondary" onclick="imprimerListe()">🖨️ Imprimer</button>
         </div>
@@ -331,134 +347,151 @@
 </div>
 
 <script>
-    // ==================== COMPTES UTILISATEURS ====================
-    const utilisateursDefaut = {
-        'admin': { password: 'admin123', role: 'admin', name: 'Administrateur' },
-        'user': { password: 'user123', role: 'user', name: 'Utilisateur' }
-    };
-    
-    function chargerUtilisateurs() {
-        const saved = localStorage.getItem('utilisateurs');
-        if (saved) return JSON.parse(saved);
-        else { localStorage.setItem('utilisateurs', JSON.stringify(utilisateursDefaut)); return utilisateursDefaut; }
-    }
-    
-    let UTILISATEURS = chargerUtilisateurs();
+    // ==================== CHARGEMENT DES AGENTS ====================
+    let agents = [];
     let currentUser = null;
-    let codesActivites = [];
-    let activiteMap = new Map();
-    let visiteurs = JSON.parse(localStorage.getItem('visiteurs_registre')) || [];
-    let editMode = false;
-    let filtreRecherche = '';
     
-    // ==================== DÉCONNEXION AUTOMATIQUE ====================
-    let inactivityTimer;
-    const INACTIVITY_DELAY = 5 * 60 * 1000; // 5 minutes
-    
-    function resetInactivityTimer() {
-        clearTimeout(inactivityTimer);
-        inactivityTimer = setTimeout(() => {
-            if (currentUser) {
-                const stayConnected = confirm('🔐 Inactivité prolongée détectée (5 minutes).\nVoulez-vous rester connecté ?');
-                if (stayConnected) {
-                    resetInactivityTimer();
-                } else {
-                    deconnecter();
-                }
-            }
-        }, INACTIVITY_DELAY);
-    }
-    
-    function activiteDetectee() {
-        if (currentUser) {
-            resetInactivityTimer();
+    function chargerAgents() {
+        const saved = localStorage.getItem('agents_aapi');
+        if (saved) {
+            agents = JSON.parse(saved);
+        } else {
+            agents = [{ nom: 'Administrateur', prenom: 'AAPI', service: 'Administration', direction: 'Direction Générale', login: 'admin', password: 'admin123', role: 'admin' }];
+            localStorage.setItem('agents_aapi', JSON.stringify(agents));
         }
+        return agents;
     }
-    
-    // Écouteurs d'événements d'activité
-    const activiteEvents = ['mousemove', 'mousedown', 'keypress', 'keydown', 'scroll', 'click', 'touchstart'];
-    activiteEvents.forEach(event => {
-        document.addEventListener(event, activiteDetectee);
-    });
-    // ================================================================
     
     // ==================== AUTHENTIFICATION ====================
-    function checkSession() {
-        const savedUser = localStorage.getItem('currentUser');
-        if (savedUser && UTILISATEURS[savedUser]) {
-            currentUser = savedUser;
-            document.getElementById('loginPage').style.display = 'none';
-            document.getElementById('appContainer').style.display = 'block';
-            document.getElementById('currentUser').innerText = UTILISATEURS[currentUser].name || currentUser;
-            const roleSpan = document.getElementById('currentUserRole');
-            roleSpan.innerText = UTILISATEURS[currentUser].role === 'admin' ? 'Administrateur' : 'Utilisateur';
-            roleSpan.className = 'role ' + (UTILISATEURS[currentUser].role === 'admin' ? 'admin' : 'user');
-            appliquerDroits();
-            initialiserApp();
-            resetInactivityTimer(); // Démarrer le timer
-        }
-    }
-    
     function authentifier() {
-        const user = document.getElementById('loginUser').value.trim();
+        const login = document.getElementById('loginUser').value.trim().toLowerCase();
         const pwd = document.getElementById('loginPassword').value;
-        if (UTILISATEURS[user] && UTILISATEURS[user].password === pwd) {
-            currentUser = user;
-            localStorage.setItem('currentUser', user);
+        
+        const agent = agents.find(a => a.login === login && a.password === pwd);
+        if (agent) {
+            currentUser = agent;
+            localStorage.setItem('currentUser_aapi', login);
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('appContainer').style.display = 'block';
-            document.getElementById('currentUser').innerText = UTILISATEURS[currentUser].name || currentUser;
+            document.getElementById('currentUser').innerText = `${agent.prenom} ${agent.nom}`;
             const roleSpan = document.getElementById('currentUserRole');
-            roleSpan.innerText = UTILISATEURS[currentUser].role === 'admin' ? 'Administrateur' : 'Utilisateur';
-            roleSpan.className = 'role ' + (UTILISATEURS[currentUser].role === 'admin' ? 'admin' : 'user');
-            appliquerDroits();
+            roleSpan.innerText = agent.role === 'admin' ? 'Administrateur' : 'Agent';
+            roleSpan.className = 'role ' + (agent.role === 'admin' ? 'admin' : 'user');
+            chargerAgentInfo();
             initialiserApp();
-            resetInactivityTimer(); // Démarrer le timer
+            resetInactivityTimer();
         } else {
             document.getElementById('loginError').style.display = 'block';
         }
     }
     
     function deconnecter() {
-        localStorage.removeItem('currentUser');
+        localStorage.removeItem('currentUser_aapi');
         currentUser = null;
         document.getElementById('appContainer').style.display = 'none';
         document.getElementById('loginPage').style.display = 'block';
         document.getElementById('loginUser').value = '';
         document.getElementById('loginPassword').value = '';
-        clearTimeout(inactivityTimer); // Arrêter le timer
+        clearTimeout(inactivityTimer);
     }
     
-    function appliquerDroits() {
-        const isAdmin = UTILISATEURS[currentUser]?.role === 'admin';
-        if (!isAdmin) {
-            let style = document.getElementById('userRightsStyle');
-            if (!style) {
-                style = document.createElement('style');
-                style.id = 'userRightsStyle';
-                style.textContent = '.btn-edit, .btn-delete, .btn-warning, .btn-excel, .btn-success { opacity: 0.5; pointer-events: none; } .btn-edit, .btn-delete { display: none; }';
-                document.head.appendChild(style);
+    function checkSession() {
+        chargerAgents();
+        const saved = localStorage.getItem('currentUser_aapi');
+        if (saved) {
+            const agent = agents.find(a => a.login === saved);
+            if (agent) {
+                currentUser = agent;
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                document.getElementById('currentUser').innerText = `${agent.prenom} ${agent.nom}`;
+                const roleSpan = document.getElementById('currentUserRole');
+                roleSpan.innerText = agent.role === 'admin' ? 'Administrateur' : 'Agent';
+                roleSpan.className = 'role ' + (agent.role === 'admin' ? 'admin' : 'user');
+                chargerAgentInfo();
+                initialiserApp();
+                resetInactivityTimer();
+                return true;
             }
-        } else {
-            const style = document.getElementById('userRightsStyle');
-            if (style) style.remove();
+        }
+        return false;
+    }
+    
+    function chargerAgentInfo() {
+        if (currentUser) {
+            document.getElementById('agentNom').innerText = `${currentUser.prenom} ${currentUser.nom}`;
+            document.getElementById('agentService').innerText = currentUser.service || '-';
+            document.getElementById('agentDirection').innerText = currentUser.direction || '-';
         }
     }
     
-    // ==================== FONCTIONS UTILITAIRES ====================
-    function ajouterSuffixeRC(rc) { if (!rc) return ''; rc = rc.trim().toUpperCase(); return rc.endsWith('/22') ? rc : rc + '/22'; }
-    function enleverSuffixeRC(rc) { if (!rc) return ''; return rc.endsWith('/22') ? rc.slice(0, -3) : rc; }
+    // ==================== DÉCONNEXION AUTOMATIQUE ====================
+    let inactivityTimer;
+    const INACTIVITY_DELAY = 5 * 60 * 1000;
     
-    function getStatutTexte(s) { return s==='RC_Personne_Physique'?'RC Physique':s==='RC_Personne_Morale'?'RC Morale':s==='Non_commercant'?'Non commerçant':''; }
-    function getMotifTexte(m) { return m==='Inscription_RC'?'Inscription RC':m==='Denomination'?'Dénomination':m==='Renseignement'?'Renseignement':''; }
-    function getTypeInscriptionTexte(t) { 
-        return t==='Immatriculation_Principale'?'Immatric. Princ.':t==='Modification_Principale'?'Modif. Princ.':t==='Immatriculation_Secondaire'?'Immatric. Sec.':t==='Modification_Secondaire'?'Modif. Sec.':t==='Radiation'?'Radiation':'';
+    function resetInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            if (currentUser) {
+                const stay = confirm('🔐 Inactivité prolongée (5 minutes).\nVoulez-vous rester connecté ?');
+                if (stay) resetInactivityTimer();
+                else deconnecter();
+            }
+        }, INACTIVITY_DELAY);
     }
     
-    // ==================== RECHERCHE ACTIVITÉS ====================
+    document.addEventListener('mousemove', () => { if (currentUser) resetInactivityTimer(); });
+    document.addEventListener('keydown', () => { if (currentUser) resetInactivityTimer(); });
+    document.addEventListener('click', () => { if (currentUser) resetInactivityTimer(); });
+    
+    // ==================== VARIABLES VISITEURS ====================
+    let codesActivites = [];
+    let activiteMap = new Map();
+    let visiteurs = JSON.parse(localStorage.getItem('visiteurs_aapi')) || [];
+    let editMode = false;
+    let filtreRecherche = '';
+    
+    // ==================== FONCTIONS UTILITAIRES ====================
+    // Validation du numéro RC : 2 chiffres + A ou B + 9 chiffres
+    function validerRC(rc) {
+        if (!rc) return true;
+        return /^\d{2}[AB]\d{9}$/.test(rc.trim().toUpperCase());
+    }
+    
+    // Nettoyer le RC (mettre en majuscules)
+    function nettoyerRC(rc) {
+        if (!rc) return '';
+        return rc.trim().toUpperCase();
+    }
+    
+    function getStatutTexte(s) {
+        if (s === 'RC_Personne_Physique') return 'RC Physique';
+        if (s === 'RC_Personne_Morale') return 'RC Morale';
+        if (s === 'Non_commercant') return 'Non commerçant';
+        return '';
+    }
+    
+    function getMotifTexte(m) {
+        if (m === 'Inscription_RC') return 'Inscription RC';
+        if (m === 'Denomination') return 'Dénomination';
+        if (m === 'Renseignement') return 'Renseignement';
+        return '';
+    }
+    
+    function getTypeInscriptionTexte(t) {
+        const types = {
+            'Immatriculation_Principale': 'Immatric. Princ.',
+            'Modification_Principale': 'Modif. Princ.',
+            'Immatriculation_Secondaire': 'Immatric. Sec.',
+            'Modification_Secondaire': 'Modif. Sec.',
+            'Radiation': 'Radiation'
+        };
+        return types[t] || '';
+    }
+    
     function rechercherActivites(terme) {
-        if (!terme || terme.trim() === "") return [];
+        if (!terme || terme.trim() === '') return [];
         terme = terme.toLowerCase().trim();
         return codesActivites.filter(a => a.code.toLowerCase().includes(terme) || a.libelle.toLowerCase().includes(terme));
     }
@@ -467,7 +500,7 @@
         const input = document.getElementById(inputId);
         if (!input) return;
         
-        input.addEventListener('input', function(e) {
+        input.addEventListener('input', function() {
             const terme = this.value.trim();
             const suggestionsDiv = document.getElementById(suggestionsId);
             const infoDiv = document.getElementById(infoId);
@@ -488,7 +521,7 @@
                     resultats.slice(0, 15).forEach(r => {
                         const div = document.createElement('div');
                         div.className = 'suggestion-item';
-                        div.innerHTML = `<span class="suggestion-code">${r.code}</span> - ${r.libelle.substring(0, 80)}`;
+                        div.innerHTML = `<span style="font-weight:bold; font-family:monospace;">${r.code}</span> - ${r.libelle.substring(0, 80)}`;
                         div.onclick = () => {
                             input.value = r.code;
                             suggestionsDiv.style.display = 'none';
@@ -498,6 +531,8 @@
                             }
                             if (errorDiv) errorDiv.style.display = 'none';
                         };
+                        div.onmouseover = () => { div.style.background = '#0056b3'; div.style.color = 'white'; };
+                        div.onmouseout = () => { div.style.background = 'white'; div.style.color = 'black'; };
                         suggestionsDiv.appendChild(div);
                     });
                     suggestionsDiv.style.display = 'block';
@@ -517,7 +552,7 @@
         });
     }
     
-    // ==================== CHARGEMENT EXCEL ACTIVITÉS ====================
+    // ==================== CHARGEMENT EXCEL ====================
     document.getElementById('excelFile').addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -555,7 +590,7 @@
                 setupAutocomplete('codeActivite', 'suggestions', 'activiteInfo', 'codeError');
                 setupAutocomplete('codeActiviteRenseignement', 'suggestionsRenseignement', 'activiteInfoRenseignement', null);
             } else {
-                statusDiv.innerHTML = '❌ Aucune donnée trouvée. Format attendu: Code | Libellé';
+                statusDiv.innerHTML = '❌ Aucune donnée trouvée. Format: Code | Libellé';
                 statusDiv.style.color = 'red';
             }
         };
@@ -574,18 +609,20 @@
         tbody.innerHTML = '';
         
         if (filtres.length === 0 && visiteurs.length > 0) {
-            tbody.innerHTML = '<tr><td colspan="16" style="text-align:center">🔍 Aucun résultat</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="15" style="text-align:center">🔍 Aucun résultat</td></tr>';
         } else if (filtres.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="16" style="text-align:center">Aucun visiteur enregistré</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="15" style="text-align:center">Aucun visiteur enregistré</td></tr>';
         } else {
             filtres.forEach(v => {
                 const idx = visiteurs.findIndex(orig => orig === v);
                 const libelle = activiteMap.get(v.codeActivite) || v.libelleActivite || '';
                 tbody.innerHTML += `<tr>
                     <td class="action-buttons">
-                        <button class="btn-action btn-edit" onclick="modifierEnregistrement(${idx})" title="Modifier">✏️</button>
-                        <button class="btn-action btn-delete" onclick="supprimerEnregistrement(${idx})" title="Supprimer">🗑️</button>
+                        <button class="btn-action btn-edit" onclick="modifierVisiteur(${idx})" title="Modifier">✏️</button>
+                        <button class="btn-action btn-delete" onclick="supprimerVisiteur(${idx})" title="Supprimer">🗑️</button>
                     </td>
+                    <td>${v.agentNom || ''}</td>
+                    <td>${v.agentService || ''}</td>
                     <td>${v.date || ''}</td>
                     <td>${v.nomPrenom || ''}</td>
                     <td>${v.dateNaissance || ''}</td>
@@ -595,12 +632,9 @@
                     <td>${v.numRC || ''}</td>
                     <td>${getMotifTexte(v.motifVisite)}</td>
                     <td>${getTypeInscriptionTexte(v.typeInscription)}</td>
-                    <td>${v.numRCInscription || ''}</td>
                     <td>${v.codeActivite || ''}</td>
-                    <td>${libelle.length > 35 ? libelle.substring(0,35)+'...' : libelle}</td>
-                    <td>${v.numDenomination || ''}</td>
-                    <td>${v.libelleDenomination || ''}</td>
-                    <td>${v.observationGenerale || ''}</td>
+                    <td>${libelle.length > 35 ? libelle.substring(0, 35) + '...' : libelle}</td>
+                    <td>${(v.observationGenerale || '').substring(0, 30)}${(v.observationGenerale || '').length > 30 ? '...' : ''}</td>
                 </tr>`;
             });
         }
@@ -616,10 +650,11 @@
     }
     
     // ==================== MODIFICATION / SUPPRESSION ====================
-    function modifierEnregistrement(idx) {
-        const isAdmin = UTILISATEURS[currentUser]?.role === 'admin';
-        if (!isAdmin) { alert('Vous n\'avez pas les droits pour modifier'); return; }
-        
+    function modifierVisiteur(idx) {
+        if (currentUser.role !== 'admin') {
+            alert('Vous n\'avez pas les droits pour modifier');
+            return;
+        }
         const v = visiteurs[idx];
         if (!v) return;
         editMode = true;
@@ -635,10 +670,10 @@
         document.getElementById('lieuNaissance').value = v.lieuNaissance || '';
         document.getElementById('statutVisiteur').value = v.statutVisiteur || '';
         document.getElementById('nomSociete').value = v.nomSociete || '';
-        document.getElementById('numRC').value = enleverSuffixeRC(v.numRC) || '';
+        document.getElementById('numRC').value = v.numRC || '';
         document.getElementById('motifVisite').value = v.motifVisite || '';
         document.getElementById('typeInscription').value = v.typeInscription || '';
-        document.getElementById('numRCInscription').value = enleverSuffixeRC(v.numRCInscription) || '';
+        document.getElementById('numRCInscription').value = v.numRCInscription || '';
         document.getElementById('codeActivite').value = v.codeActivite || '';
         document.getElementById('numDenomination').value = v.numDenomination || '';
         document.getElementById('libelleDenomination').value = v.libelleDenomination || '';
@@ -658,12 +693,14 @@
         document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
     }
     
-    function supprimerEnregistrement(idx) {
-        const isAdmin = UTILISATEURS[currentUser]?.role === 'admin';
-        if (!isAdmin) { alert('Vous n\'avez pas les droits pour supprimer'); return; }
+    function supprimerVisiteur(idx) {
+        if (currentUser.role !== 'admin') {
+            alert('Vous n\'avez pas les droits pour supprimer');
+            return;
+        }
         if (confirm(`Supprimer l'enregistrement de "${visiteurs[idx].nomPrenom || 'ce visiteur'}" ?`)) {
             visiteurs.splice(idx, 1);
-            localStorage.setItem('visiteurs_registre', JSON.stringify(visiteurs));
+            localStorage.setItem('visiteurs_aapi', JSON.stringify(visiteurs));
             afficherTableau();
             calculerStatistiques();
             alert('✅ Supprimé');
@@ -688,9 +725,20 @@
         if (infoDiv) infoDiv.style.display = 'none';
     }
     
+    document.getElementById('cancelEditBtn').addEventListener('click', annulerModification);
+    
     // ==================== ENREGISTREMENT ====================
-    function enregistrerVisiteur() {
-        const isAdmin = UTILISATEURS[currentUser]?.role === 'admin';
+    document.getElementById('visiteurForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Validation du numéro RC (2 chiffres + A/B + 9 chiffres)
+        const numRCValue = document.getElementById('numRC').value.trim().toUpperCase();
+        if (numRCValue && !validerRC(numRCValue)) {
+            document.getElementById('rcError').style.display = 'block';
+            document.getElementById('numRC').focus();
+            return;
+        }
+        document.getElementById('rcError').style.display = 'none';
         
         const nouveau = {
             date: document.getElementById('dateVisite').value,
@@ -699,15 +747,18 @@
             lieuNaissance: document.getElementById('lieuNaissance').value.trim().toUpperCase(),
             statutVisiteur: document.getElementById('statutVisiteur').value,
             nomSociete: document.getElementById('nomSociete').value.trim().toUpperCase(),
-            numRC: ajouterSuffixeRC(document.getElementById('numRC').value),
+            numRC: nettoyerRC(numRCValue),
             motifVisite: document.getElementById('motifVisite').value,
             typeInscription: document.getElementById('typeInscription').value,
-            numRCInscription: ajouterSuffixeRC(document.getElementById('numRCInscription').value),
+            numRCInscription: nettoyerRC(document.getElementById('numRCInscription').value),
             codeActivite: document.getElementById('codeActivite')?.value.trim().toUpperCase() || document.getElementById('codeActiviteRenseignement')?.value.trim().toUpperCase() || '',
             libelleActivite: '',
             numDenomination: document.getElementById('numDenomination')?.value.trim() || '',
             libelleDenomination: document.getElementById('libelleDenomination')?.value.trim().toUpperCase() || '',
-            observationGenerale: document.getElementById('observationGenerale').value.trim()
+            observationGenerale: document.getElementById('observationGenerale').value.trim(),
+            agentNom: currentUser ? `${currentUser.prenom} ${currentUser.nom}` : '',
+            agentService: currentUser ? currentUser.service : '',
+            agentDirection: currentUser ? currentUser.direction : ''
         };
         
         if (nouveau.codeActivite && activiteMap.has(nouveau.codeActivite)) {
@@ -715,19 +766,19 @@
         }
         
         const idx = parseInt(document.getElementById('editIndex').value);
-        if (idx >= 0 && idx < visiteurs.length && isAdmin) {
+        if (idx >= 0 && idx < visiteurs.length && currentUser.role === 'admin') {
             visiteurs[idx] = nouveau;
-            alert('✏️ Enregistrement modifié');
+            alert('✏️ Visiteur modifié');
         } else {
             visiteurs.push(nouveau);
-            alert('✅ Nouveau visiteur enregistré');
+            alert('✅ Visiteur enregistré');
         }
         
-        localStorage.setItem('visiteurs_registre', JSON.stringify(visiteurs));
+        localStorage.setItem('visiteurs_aapi', JSON.stringify(visiteurs));
         afficherTableau();
         calculerStatistiques();
         annulerModification();
-    }
+    });
     
     // ==================== STATISTIQUES ====================
     function calculerStatistiques() {
@@ -753,28 +804,28 @@
     function exporterCSV() {
         const filtres = getVisiteursFiltres();
         if (!filtres.length) { alert('Aucune donnée'); return; }
-        let csv = 'Date;Visiteur;Date naissance;Lieu naissance;Statut;Société;N° RC;Motif;Type Inscription;N° RC Inscription;Code activité;Libellé activité;N° Dénomination;Libellé Dénomination;Observation\n';
+        let csv = 'Agent;Service;Direction;Date;Visiteur;Statut;Société;N° RC;Motif;Code activité;Observation\n';
         filtres.forEach(v => {
-            csv += `"${v.date||''}";"${v.nomPrenom||''}";"${v.dateNaissance||''}";"${v.lieuNaissance||''}";"${getStatutTexte(v.statutVisiteur)}";"${v.nomSociete||''}";"${v.numRC||''}";"${getMotifTexte(v.motifVisite)}";"${getTypeInscriptionTexte(v.typeInscription)}";"${v.numRCInscription||''}";"${v.codeActivite||''}";"${activiteMap.get(v.codeActivite)||v.libelleActivite||''}";"${v.numDenomination||''}";"${v.libelleDenomination||''}";"${v.observationGenerale||''}"\n`;
+            csv += `"${v.agentNom||''}";"${v.agentService||''}";"${v.agentDirection||''}";"${v.date||''}";"${v.nomPrenom||''}";"${getStatutTexte(v.statutVisiteur)}";"${v.nomSociete||''}";"${v.numRC||''}";"${getMotifTexte(v.motifVisite)}";"${v.codeActivite||''}";"${(v.observationGenerale||'').replace(/;/g,',')}"\n`;
         });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv' }));
-        a.download = `visiteurs${filtreRecherche ? '_' + filtreRecherche : ''}_${new Date().toISOString().slice(0,10)}.csv`;
+        a.download = `visiteurs_${new Date().toISOString().slice(0,10)}.csv`;
         a.click();
     }
     
     function exporterExcel() {
         const filtres = getVisiteursFiltres();
         if (!filtres.length) { alert('Aucune donnée'); return; }
-        const data = [['Date','Visiteur','Date naissance','Lieu naissance','Statut','Société','N° RC','Motif','Type Inscription','N° RC Inscription','Code activité','Libellé activité','N° Dénomination','Libellé Dénomination','Observation']];
+        const data = [['Agent', 'Service', 'Direction', 'Date', 'Visiteur', 'Statut', 'Société', 'N° RC', 'Motif', 'Code activité', 'Observation']];
         filtres.forEach(v => {
-            data.push([v.date||'', v.nomPrenom||'', v.dateNaissance||'', v.lieuNaissance||'', getStatutTexte(v.statutVisiteur), v.nomSociete||'', v.numRC||'', getMotifTexte(v.motifVisite), getTypeInscriptionTexte(v.typeInscription), v.numRCInscription||'', v.codeActivite||'', activiteMap.get(v.codeActivite)||v.libelleActivite||'', v.numDenomination||'', v.libelleDenomination||'', v.observationGenerale||'']);
+            data.push([v.agentNom||'', v.agentService||'', v.agentDirection||'', v.date||'', v.nomPrenom||'', getStatutTexte(v.statutVisiteur), v.nomSociete||'', v.numRC||'', getMotifTexte(v.motifVisite), v.codeActivite||'', v.observationGenerale||'']);
         });
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.aoa_to_sheet(data);
-        ws['!cols'] = [{wch:12},{wch:25},{wch:12},{wch:15},{wch:15},{wch:25},{wch:18},{wch:15},{wch:18},{wch:18},{wch:12},{wch:45},{wch:15},{wch:22},{wch:30}];
+        ws['!cols'] = [{wch:20},{wch:20},{wch:20},{wch:12},{wch:25},{wch:15},{wch:25},{wch:18},{wch:18},{wch:12},{wch:30}];
         XLSX.utils.book_append_sheet(wb, ws, 'Visiteurs');
-        XLSX.writeFile(wb, `visiteurs${filtreRecherche ? '_' + filtreRecherche : ''}_${new Date().toISOString().slice(0,10)}.xlsx`);
+        XLSX.writeFile(wb, `visiteurs_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
     
     function importerExcel() {
@@ -793,17 +844,19 @@
                 for (let i = 1; i < rows.length; i++) {
                     const r = rows[i];
                     if (r[0]) nouvelles.push({
-                        date: r[0]||'', nomPrenom: r[1]?String(r[1]).trim().toUpperCase():'', dateNaissance: r[2]||'', lieuNaissance: r[3]?String(r[3]).trim().toUpperCase():'',
-                        statutVisiteur: r[4]||'', nomSociete: r[5]?String(r[5]).trim().toUpperCase():'', numRC: r[6]||'', motifVisite: r[7]||'', typeInscription: r[8]||'',
-                        numRCInscription: r[9]||'', codeActivite: r[10]||'', libelleActivite: r[11]||'', numDenomination: r[12]||'', libelleDenomination: r[13]?String(r[13]).trim().toUpperCase():'', observationGenerale: r[14]||''
+                        agentNom: r[0]||'', agentService: r[1]||'', agentDirection: r[2]||'', date: r[3]||'',
+                        nomPrenom: r[4]?String(r[4]).trim().toUpperCase():'', statutVisiteur: '', nomSociete: r[5]||'',
+                        numRC: r[6]||'', motifVisite: '', codeActivite: r[7]||'', observationGenerale: r[8]||'',
+                        dateNaissance: '', lieuNaissance: '', typeInscription: '', numRCInscription: '',
+                        libelleActivite: '', numDenomination: '', libelleDenomination: ''
                     });
                 }
-                if (nouvelles.length && confirm(`${nouvelles.length} enregistrements trouvés. Remplacer les données actuelles ?`)) {
+                if (nouvelles.length && confirm(`${nouvelles.length} enregistrements trouvés. Remplacer ?`)) {
                     visiteurs = nouvelles;
-                    localStorage.setItem('visiteurs_registre', JSON.stringify(visiteurs));
+                    localStorage.setItem('visiteurs_aapi', JSON.stringify(visiteurs));
                     afficherTableau();
                     calculerStatistiques();
-                    alert(`✅ ${visiteurs.length} enregistrements importés`);
+                    alert(`✅ ${visiteurs.length} importés`);
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -823,27 +876,66 @@
         let rows = '';
         filtres.forEach(v => {
             rows += `<tr>
+                <td>${v.agentNom||''}</td>
+                <td>${v.agentService||''}</td>
                 <td>${v.date||''}</td>
                 <td>${v.nomPrenom||''}</td>
-                <td>${v.dateNaissance||''}</td>
-                <td>${v.lieuNaissance||''}</td>
                 <td>${getStatutTexte(v.statutVisiteur)}</td>
-                <td>${v.nomSociete||''}</td>
                 <td>${v.numRC||''}</td>
                 <td>${getMotifTexte(v.motifVisite)}</td>
-                <td>${getTypeInscriptionTexte(v.typeInscription)}</td>
-                <td>${v.numRCInscription||''}</td>
                 <td>${v.codeActivite||''}</td>
-                <td>${activiteMap.get(v.codeActivite)||v.libelleActivite||''}</td>
-                <td>${v.numDenomination||''}</td>
-                <td>${v.libelleDenomination||''}</td>
                 <td>${v.observationGenerale||''}</td>
             </tr>`;
         });
         const win = window.open();
-        win.document.write(`<html><head><title>Visiteurs - CNRC AAPI</title><style>body{font-family:Arial;padding:20px} table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:5px} th{background:#0056b3;color:white}</style></head><body><h2>Liste des visiteurs - CNRC AAPI Sidi bel Abbès</h2><h3>${new Date().toLocaleDateString()}</h3>${filtreRecherche ? `<p>🔍 Filtre: "${filtreRecherche}" (${filtres.length} résultats)</p>` : ''}<table><thead><tr><th>Date</th><th>Visiteur</th><th>Naiss.</th><th>Lieu</th><th>Statut</th><th>Société</th><th>N° RC</th><th>Motif</th><th>Type Ins.</th><th>N° RC Ins.</th><th>Code</th><th>Libellé</th><th>N° Dén.</th><th>Libellé Dén.</th><th>Obs.</th></tr></thead><tbody>${rows}</tbody></table><p>Total: ${filtres.length} visiteur(s)</p></body></html>`);
+        win.document.write(`<html><head><title>Visiteurs - AAPI</title><style>table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:5px} th{background:#0056b3;color:white}</style></head><body><h2>Liste des visiteurs - AAPI</h2><h3>${new Date().toLocaleDateString()}</h3><table><thead><tr><th>Agent</th><th>Service</th><th>Date</th><th>Visiteur</th><th>Statut</th><th>N° RC</th><th>Motif</th><th>Code</th><th>Obs.</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
         win.print();
     }
+    
+    // ==================== ÉVÉNEMENTS ====================
+    document.getElementById('statutVisiteur').addEventListener('change', function() {
+        const val = this.value;
+        if (val === 'RC_Personne_Physique' || val === 'RC_Personne_Morale') {
+            document.getElementById('rcField').style.display = 'block';
+            if (val === 'RC_Personne_Physique') {
+                document.getElementById('rcFormatInfo').innerHTML = 'Format: <strong style="color:#c62828;">2 chiffres + A + 9 chiffres</strong> (ex: 01A123456789)';
+            } else {
+                document.getElementById('rcFormatInfo').innerHTML = 'Format: <strong style="color:#2e7d32;">2 chiffres + B + 9 chiffres</strong> (ex: 01B123456789)';
+            }
+        } else {
+            document.getElementById('rcField').style.display = 'none';
+        }
+        if (val === 'RC_Personne_Morale') {
+            document.getElementById('societeField').style.display = 'block';
+        } else {
+            document.getElementById('societeField').style.display = 'none';
+        }
+    });
+    
+    document.getElementById('motifVisite').addEventListener('change', function() {
+        const val = this.value;
+        document.getElementById('sousMenuInscription').style.display = 'none';
+        document.getElementById('inscriptionRCFields').style.display = 'none';
+        document.getElementById('denominationFields').style.display = 'none';
+        document.getElementById('renseignementFields').style.display = 'none';
+        if (val === 'Inscription_RC') {
+            document.getElementById('sousMenuInscription').style.display = 'block';
+            document.getElementById('inscriptionRCFields').style.display = 'block';
+        } else if (val === 'Denomination') {
+            document.getElementById('denominationFields').style.display = 'block';
+        } else if (val === 'Renseignement') {
+            document.getElementById('renseignementFields').style.display = 'block';
+        }
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.relative')) {
+            const s1 = document.getElementById('suggestions');
+            const s2 = document.getElementById('suggestionsRenseignement');
+            if (s1) s1.style.display = 'none';
+            if (s2) s2.style.display = 'none';
+        }
+    });
     
     // ==================== INITIALISATION ====================
     function initialiserApp() {
@@ -858,61 +950,14 @@
             afficherTableau();
         });
         
-        document.getElementById('visiteurForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            enregistrerVisiteur();
-        });
-        
-        document.getElementById('cancelEditBtn').addEventListener('click', annulerModification);
-        
-        // Événements formulaire
-        document.getElementById('statutVisiteur').addEventListener('change', function() {
-            const val = this.value;
-            if (val === 'RC_Personne_Physique') {
-                document.getElementById('rcField').style.display = 'block';
-                document.getElementById('societeField').style.display = 'none';
-                document.getElementById('rcFormatInfo').innerHTML = 'Format: 2 chiffres + <strong style="color:#c62828">A</strong> + 9 chiffres';
-            } else if (val === 'RC_Personne_Morale') {
-                document.getElementById('rcField').style.display = 'block';
-                document.getElementById('societeField').style.display = 'block';
-                document.getElementById('rcFormatInfo').innerHTML = 'Format: 2 chiffres + <strong style="color:#2e7d32">B</strong> + 9 chiffres';
-            } else {
-                document.getElementById('rcField').style.display = 'none';
-                document.getElementById('societeField').style.display = 'none';
-            }
-        });
-        
-        document.getElementById('motifVisite').addEventListener('change', function() {
-            const val = this.value;
-            document.getElementById('sousMenuInscription').style.display = 'none';
-            document.getElementById('inscriptionRCFields').style.display = 'none';
-            document.getElementById('denominationFields').style.display = 'none';
-            document.getElementById('renseignementFields').style.display = 'none';
-            if (val === 'Inscription_RC') {
-                document.getElementById('sousMenuInscription').style.display = 'block';
-                document.getElementById('inscriptionRCFields').style.display = 'block';
-            } else if (val === 'Denomination') {
-                document.getElementById('denominationFields').style.display = 'block';
-            } else if (val === 'Renseignement') {
-                document.getElementById('renseignementFields').style.display = 'block';
-            }
-        });
-        
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.relative')) {
-                const s1 = document.getElementById('suggestions');
-                const s2 = document.getElementById('suggestionsRenseignement');
-                if (s1) s1.style.display = 'none';
-                if (s2) s2.style.display = 'none';
-            }
-        });
-        
-        // Réinitialiser la couleur du bouton submit si désactivé
         document.getElementById('submitBtn').disabled = false;
     }
     
-    // Démarrer l'application
-    checkSession();
+    // Démarrer
+    if (!checkSession()) {
+        document.getElementById('loginPage').style.display = 'block';
+        document.getElementById('appContainer').style.display = 'none';
+    }
 </script>
 </body>
 </html>
