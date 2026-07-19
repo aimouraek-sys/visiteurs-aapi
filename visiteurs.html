@@ -6,7 +6,7 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Arial, sans-serif; background: #e9ecef; margin: 0; padding: 20px; min-height: 100vh; }
-        .container { max-width: 1400px; margin: auto; }
+        .container { max-width: 1500px; margin: auto; }
         
         .login-container {
             max-width: 400px;
@@ -71,11 +71,16 @@
         .btn-secondary:hover { background: #5a6268; }
         .btn-warning { background: #ffc107; color: #333; }
         .btn-warning:hover { background: #e0a800; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-info:hover { background: #138496; }
         
         .btn-action { padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; border: none; }
         .btn-edit { background: #ffc107; color: #333; }
+        .btn-edit:hover { background: #e0a800; }
         .btn-delete { background: #dc3545; color: white; }
+        .btn-delete:hover { background: #c82333; }
         .action-buttons { display: flex; gap: 4px; white-space: nowrap; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
         
         .agent-info {
             background: #f8f9fa;
@@ -90,25 +95,51 @@
         .agent-info .value { font-weight: bold; color: #0056b3; font-size: 14px; }
         
         .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
-        .search-bar input { flex: 1; }
+        .search-bar input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
         .search-icon, .clear-search { padding: 10px 15px; border-radius: 8px; cursor: pointer; background: #0056b3; color: white; text-align: center; }
         .clear-search { background: #6c757d; }
         .search-info { font-size: 12px; margin-bottom: 10px; display: none; }
         
-        .table-wrapper { max-height: 400px; overflow-y: auto; }
+        .table-wrapper { max-height: 500px; overflow-y: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
         th { background: #0056b3; color: white; position: sticky; top: 0; }
         .badge-count { background: #28a745; color: white; padding: 2px 8px; border-radius: 20px; font-size: 11px; margin-left: 10px; }
-        .btn-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        
         .stats-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
         .stat-box { background: #f8f9fa; border-radius: 10px; padding: 15px; text-align: center; min-width: 120px; }
         .stat-number { font-size: 28px; font-weight: bold; color: #0056b3; }
         .stat-label { font-size: 12px; color: #666; }
         
+        .edition-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .edition-section h3 {
+            color: #0056b3;
+            margin-top: 0;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        .edition-filters {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .edition-filters .form-group { margin-bottom: 0; min-width: 150px; }
+        .edition-filters button { white-space: nowrap; }
+        .edition-result { margin-top: 15px; overflow-x: auto; }
+        .edition-result table { font-size: 12px; }
+        .edition-result table th { background: #0056b3; color: white; }
+        
         .info-format { font-size: 11px; color: #666; margin-top: 4px; }
         .info-note { background: #fff3cd; padding: 10px; border-radius: 6px; font-size: 12px; margin-top: 15px; text-align: center; }
-        .edit-mode-indicator { background: #ffc107; padding: 8px; border-radius: 6px; text-align: center; display: none; margin-bottom: 15px; }
+        .edit-mode-indicator { background: #ffc107; padding: 8px; border-radius: 6px; text-align: center; display: none; margin-bottom: 15px; font-weight: bold; }
         .error { color: red; font-size: 12px; display: none; }
         .search-result { background: #d4edda; border: 1px solid #c3e6cb; padding: 8px; border-radius: 6px; margin-top: 5px; font-size: 12px; display: none; }
         .relative { position: relative; }
@@ -128,8 +159,8 @@
         .suggestion-item:hover { background: #0056b3; color: white; }
         .import-card { background: #e8f4fd; border: 1px dashed #0056b3; border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center; }
         .import-status { margin-top: 10px; font-size: 13px; }
-        hr { margin: 15px 0; border: none; border-top: 1px solid #ddd; }
         .observation-generale { background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-top: 10px; }
+        hr { margin: 15px 0; border: none; border-top: 1px solid #ddd; }
         
         @media (max-width: 768px) { .form-group { min-width: 100%; } }
     </style>
@@ -150,6 +181,8 @@
 <!-- APPLICATION PRINCIPALE -->
 <div id="appContainer" style="display:none;">
 <div class="container">
+    
+    <!-- EN-TÊTE UTILISATEUR -->
     <div class="user-info">
         <div>👤 <strong id="currentUser"></strong> <span id="currentUserRole" class="role"></span></div>
         <div>
@@ -158,6 +191,9 @@
         </div>
     </div>
     
+    <!-- ============================================================ -->
+    <!-- 1. FORMULAIRE D'ENREGISTREMENT                               -->
+    <!-- ============================================================ -->
     <div class="form-card">
         <h2>📋 Enregistrement Visiteur</h2>
         <div class="sous-titre">AAPI - Agence Nationale de Promotion de l'Investissement</div>
@@ -287,19 +323,38 @@
         </form>
     </div>
     
-    <!-- Statistiques -->
-    <div class="form-card" style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1); margin-bottom:30px;">
-        <h3 style="margin-top:0; color:#0056b3;">📊 Statistiques par motif</h3>
-        <div style="display:flex; gap:10px; margin-bottom:20px; align-items:flex-end; flex-wrap:wrap;">
-            <div class="form-group" style="flex:1; min-width:150px; margin-bottom:0;"><label>Date début</label><input type="date" id="statsDateDebut"></div>
-            <div class="form-group" style="flex:1; min-width:150px; margin-bottom:0;"><label>Date fin</label><input type="date" id="statsDateFin"></div>
-            <div><button class="btn btn-secondary" onclick="calculerStatistiques()" style="background:#17a2b8;">📈 Calculer</button></div>
+    <!-- ============================================================ -->
+    <!-- 2. ÉDITION DES STATISTIQUES                                  -->
+    <!-- ============================================================ -->
+    <div class="edition-section">
+        <h3>📊 Édition des statistiques par motif</h3>
+        <div class="edition-filters">
+            <div class="form-group"><label>Date début</label><input type="date" id="statsEditionDebut"></div>
+            <div class="form-group"><label>Date fin</label><input type="date" id="statsEditionFin"></div>
+            <button class="btn btn-info" onclick="editerStatistiques()">📊 Générer</button>
+            <button class="btn btn-success" onclick="exporterStatistiquesExcel()">📊 Excel</button>
+            <button class="btn btn-secondary" onclick="imprimerStatistiques()">🖨️ Imprimer</button>
         </div>
-        <div id="statsResultat" class="stats-container"></div>
-        <div id="statsDetail" style="margin-top:10px; font-size:12px; text-align:center;"></div>
+        <div id="statsEditionResult" class="edition-result"></div>
     </div>
     
-    <!-- Liste des visiteurs -->
+    <!-- ============================================================ -->
+    <!-- 3. ÉDITION DES VISITEURS (EXCEL + IMPRESSION)               -->
+    <!-- ============================================================ -->
+    <div class="edition-section">
+        <h3>📋 Édition des visiteurs par date</h3>
+        <div class="edition-filters">
+            <div class="form-group"><label>Date début</label><input type="date" id="visiteursEditionDebut"></div>
+            <div class="form-group"><label>Date fin</label><input type="date" id="visiteursEditionFin"></div>
+            <button class="btn btn-success" onclick="exporterVisiteursExcel()">📊 Exporter Excel</button>
+            <button class="btn btn-secondary" onclick="imprimerVisiteurs()">🖨️ Imprimer</button>
+        </div>
+        <div id="visiteursEditionResult" class="edition-result" style="display:none;"></div>
+    </div>
+    
+    <!-- ============================================================ -->
+    <!-- 4. LISTE COMPLÈTE DES VISITEURS                            -->
+    <!-- ============================================================ -->
     <div class="form-card" style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1); margin-bottom:30px;">
         <h3 style="margin-top:0; color:#0056b3;">📊 Visiteurs enregistrés <span id="nbVisiteurs" class="badge-count">0</span></h3>
         <div class="search-bar">
@@ -313,8 +368,6 @@
                 <thead>
                     <tr>
                         <th style="width:70px">Actions</th>
-                        <th>Agent</th>
-                        <th>Service</th>
                         <th>Date</th>
                         <th>Visiteur</th>
                         <th>Naiss.</th>
@@ -324,8 +377,11 @@
                         <th>N° RC</th>
                         <th>Motif</th>
                         <th>Type Ins.</th>
-                        <th>Code</th>
+                        <th>N° RC Ins.</th>
+                        <th>Code activité</th>
                         <th>Libellé</th>
+                        <th>N° Dén.</th>
+                        <th>Libellé Dén.</th>
                         <th>Obs.</th>
                     </tr>
                 </thead>
@@ -333,8 +389,7 @@
             </table>
         </div>
         <div class="btn-group">
-            <button class="btn btn-success" onclick="exporterCSV()">📎 Exporter CSV</button>
-            <button class="btn btn-success" onclick="exporterExcel()" style="background:#1f7b3a;">📊 Exporter Excel</button>
+            <button class="btn btn-success" onclick="exporterExcel()">📊 Exporter Excel (tous)</button>
             <button class="btn btn-warning" onclick="importerExcel()">📂 Importer Excel</button>
             <button class="btn btn-secondary" onclick="imprimerListe()">🖨️ Imprimer</button>
         </div>
@@ -343,11 +398,14 @@
             🔐 Déconnexion automatique après 5 minutes d'inactivité
         </div>
     </div>
+    
 </div>
 </div>
 
 <script>
-    // ==================== CHARGEMENT DES AGENTS ====================
+    // ====================================================================
+    // 1. AUTHENTIFICATION
+    // ====================================================================
     let agents = [];
     let currentUser = null;
     
@@ -356,13 +414,12 @@
         if (saved) {
             agents = JSON.parse(saved);
         } else {
-            agents = [{ nom: 'Administrateur', prenom: 'AAPI', service: 'Administration', direction: 'Direction Générale', login: 'admin', password: 'admin123', role: 'admin' }];
+            agents = [{ nom: 'Administrateur', prenom: 'AAPI', service: 'Administration', direction: 'Direction Générale', login: 'admin', password: 'Admin2026Secure!', role: 'admin' }];
             localStorage.setItem('agents_aapi', JSON.stringify(agents));
         }
         return agents;
     }
     
-    // ==================== AUTHENTIFICATION ====================
     function authentifier() {
         const login = document.getElementById('loginUser').value.trim().toLowerCase();
         const pwd = document.getElementById('loginPassword').value;
@@ -426,7 +483,9 @@
         }
     }
     
-    // ==================== DÉCONNEXION AUTOMATIQUE ====================
+    // ====================================================================
+    // 2. DÉCONNEXION AUTOMATIQUE
+    // ====================================================================
     let inactivityTimer;
     const INACTIVITY_DELAY = 5 * 60 * 1000;
     
@@ -445,38 +504,37 @@
     document.addEventListener('keydown', () => { if (currentUser) resetInactivityTimer(); });
     document.addEventListener('click', () => { if (currentUser) resetInactivityTimer(); });
     
-    // ==================== VARIABLES VISITEURS ====================
+    // ====================================================================
+    // 3. VARIABLES ET FONCTIONS UTILITAIRES
+    // ====================================================================
     let codesActivites = [];
     let activiteMap = new Map();
     let visiteurs = JSON.parse(localStorage.getItem('visiteurs_aapi')) || [];
     let editMode = false;
     let filtreRecherche = '';
     
-    // ==================== FONCTIONS UTILITAIRES ====================
-    // Validation du numéro RC : 2 chiffres + A ou B + 9 chiffres
     function validerRC(rc) {
         if (!rc) return true;
         return /^\d{2}[AB]\d{9}$/.test(rc.trim().toUpperCase());
     }
     
-    // Nettoyer le RC (mettre en majuscules)
     function nettoyerRC(rc) {
         if (!rc) return '';
         return rc.trim().toUpperCase();
     }
     
     function getStatutTexte(s) {
-        if (s === 'RC_Personne_Physique') return 'RC Physique';
-        if (s === 'RC_Personne_Morale') return 'RC Morale';
+        if (s === 'RC_Personne_Physique') return 'RC Personne Physique';
+        if (s === 'RC_Personne_Morale') return 'RC Personne Morale';
         if (s === 'Non_commercant') return 'Non commerçant';
-        return '';
+        return s || '';
     }
     
     function getMotifTexte(m) {
         if (m === 'Inscription_RC') return 'Inscription RC';
         if (m === 'Denomination') return 'Dénomination';
         if (m === 'Renseignement') return 'Renseignement';
-        return '';
+        return m || '';
     }
     
     function getTypeInscriptionTexte(t) {
@@ -487,7 +545,44 @@
             'Modification_Secondaire': 'Modif. Sec.',
             'Radiation': 'Radiation'
         };
-        return types[t] || '';
+        return types[t] || t || '';
+    }
+    
+    // Conversion des libellés en codes (pour l'import Excel)
+    function convertirLibelleVersCode(valeur, type) {
+        if (!valeur) return '';
+        valeur = valeur.trim();
+        
+        if (type === 'statut') {
+            const map = {
+                'RC Personne Physique': 'RC_Personne_Physique',
+                'RC Personne Morale': 'RC_Personne_Morale',
+                'Non commerçant': 'Non_commercant'
+            };
+            return map[valeur] || valeur;
+        }
+        
+        if (type === 'motif') {
+            const map = {
+                'Inscription RC': 'Inscription_RC',
+                'Dénomination': 'Denomination',
+                'Renseignement': 'Renseignement'
+            };
+            return map[valeur] || valeur;
+        }
+        
+        if (type === 'typeInscription') {
+            const map = {
+                'Immatriculation Principale': 'Immatriculation_Principale',
+                'Modification Principale': 'Modification_Principale',
+                'Immatriculation Secondaire': 'Immatriculation_Secondaire',
+                'Modification Secondaire': 'Modification_Secondaire',
+                'Radiation': 'Radiation'
+            };
+            return map[valeur] || valeur;
+        }
+        
+        return valeur;
     }
     
     function rechercherActivites(terme) {
@@ -552,7 +647,9 @@
         });
     }
     
-    // ==================== CHARGEMENT EXCEL ====================
+    // ====================================================================
+    // 4. CHARGEMENT EXCEL ACTIVITÉS
+    // ====================================================================
     document.getElementById('excelFile').addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -597,7 +694,9 @@
         reader.readAsArrayBuffer(file);
     });
     
-    // ==================== AFFICHAGE TABLEAU ====================
+    // ====================================================================
+    // 5. AFFICHAGE TABLEAU DES VISITEURS
+    // ====================================================================
     function getVisiteursFiltres() {
         if (!filtreRecherche) return visiteurs;
         return visiteurs.filter(v => v.nomPrenom && v.nomPrenom.toLowerCase().includes(filtreRecherche.toLowerCase()));
@@ -609,9 +708,9 @@
         tbody.innerHTML = '';
         
         if (filtres.length === 0 && visiteurs.length > 0) {
-            tbody.innerHTML = '<tr><td colspan="15" style="text-align:center">🔍 Aucun résultat</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="16" style="text-align:center">🔍 Aucun résultat</td></tr>';
         } else if (filtres.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="15" style="text-align:center">Aucun visiteur enregistré</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="16" style="text-align:center">Aucun visiteur enregistré</td></tr>';
         } else {
             filtres.forEach(v => {
                 const idx = visiteurs.findIndex(orig => orig === v);
@@ -621,19 +720,20 @@
                         <button class="btn-action btn-edit" onclick="modifierVisiteur(${idx})" title="Modifier">✏️</button>
                         <button class="btn-action btn-delete" onclick="supprimerVisiteur(${idx})" title="Supprimer">🗑️</button>
                     </td>
-                    <td>${v.agentNom || ''}</td>
-                    <td>${v.agentService || ''}</td>
                     <td>${v.date || ''}</td>
                     <td>${v.nomPrenom || ''}</td>
                     <td>${v.dateNaissance || ''}</td>
                     <td>${v.lieuNaissance || ''}</td>
-                    <td>${getStatutTexte(v.statutVisiteur)}</td>
+                    <td>${getStatutTexte(v.statutVisiteur) || '-'}</td>
                     <td>${v.nomSociete || ''}</td>
                     <td>${v.numRC || ''}</td>
-                    <td>${getMotifTexte(v.motifVisite)}</td>
-                    <td>${getTypeInscriptionTexte(v.typeInscription)}</td>
+                    <td>${getMotifTexte(v.motifVisite) || '-'}</td>
+                    <td>${getTypeInscriptionTexte(v.typeInscription) || '-'}</td>
+                    <td>${v.numRCInscription || ''}</td>
                     <td>${v.codeActivite || ''}</td>
                     <td>${libelle.length > 35 ? libelle.substring(0, 35) + '...' : libelle}</td>
+                    <td>${v.numDenomination || ''}</td>
+                    <td>${v.libelleDenomination || ''}</td>
                     <td>${(v.observationGenerale || '').substring(0, 30)}${(v.observationGenerale || '').length > 30 ? '...' : ''}</td>
                 </tr>`;
             });
@@ -649,7 +749,9 @@
         }
     }
     
-    // ==================== MODIFICATION / SUPPRESSION ====================
+    // ====================================================================
+    // 6. MODIFICATION / SUPPRESSION DES VISITEURS
+    // ====================================================================
     function modifierVisiteur(idx) {
         if (currentUser.role !== 'admin') {
             alert('Vous n\'avez pas les droits pour modifier');
@@ -702,7 +804,6 @@
             visiteurs.splice(idx, 1);
             localStorage.setItem('visiteurs_aapi', JSON.stringify(visiteurs));
             afficherTableau();
-            calculerStatistiques();
             alert('✅ Supprimé');
         }
     }
@@ -727,11 +828,12 @@
     
     document.getElementById('cancelEditBtn').addEventListener('click', annulerModification);
     
-    // ==================== ENREGISTREMENT ====================
+    // ====================================================================
+    // 7. ENREGISTREMENT VISITEUR
+    // ====================================================================
     document.getElementById('visiteurForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // Validation du numéro RC (2 chiffres + A/B + 9 chiffres)
         const numRCValue = document.getElementById('numRC').value.trim().toUpperCase();
         if (numRCValue && !validerRC(numRCValue)) {
             document.getElementById('rcError').style.display = 'block';
@@ -776,58 +878,346 @@
         
         localStorage.setItem('visiteurs_aapi', JSON.stringify(visiteurs));
         afficherTableau();
-        calculerStatistiques();
         annulerModification();
     });
     
-    // ==================== STATISTIQUES ====================
-    function calculerStatistiques() {
-        const debut = document.getElementById('statsDateDebut').value;
-        const fin = document.getElementById('statsDateFin').value;
-        let ins = 0, den = 0, ren = 0;
-        visiteurs.forEach(v => {
-            if (debut && v.date < debut) return;
-            if (fin && v.date > fin) return;
-            if (v.motifVisite === 'Inscription_RC') ins++;
-            else if (v.motifVisite === 'Denomination') den++;
-            else if (v.motifVisite === 'Renseignement') ren++;
+    // ====================================================================
+    // 8. ÉDITION STATISTIQUES
+    // ====================================================================
+    function editerStatistiques() {
+        const debut = document.getElementById('statsEditionDebut').value;
+        const fin = document.getElementById('statsEditionFin').value;
+        
+        let filtres = visiteurs;
+        if (debut) filtres = filtres.filter(v => v.date >= debut);
+        if (fin) filtres = filtres.filter(v => v.date <= fin);
+        
+        const stats = {};
+        filtres.forEach(v => {
+            const motif = v.motifVisite || 'Non spécifié';
+            if (!stats[motif]) stats[motif] = 0;
+            stats[motif]++;
         });
-        document.getElementById('statsResultat').innerHTML = `
-            <div class="stat-box"><div class="stat-number">${ins}</div><div class="stat-label">Inscription RC</div></div>
-            <div class="stat-box"><div class="stat-number">${den}</div><div class="stat-label">Dénomination</div></div>
-            <div class="stat-box"><div class="stat-number">${ren}</div><div class="stat-label">Renseignement</div></div>
-            <div class="stat-box"><div class="stat-number">${ins+den+ren}</div><div class="stat-label">Total</div></div>`;
-        document.getElementById('statsDetail').innerHTML = (debut || fin) ? `Période du ${debut||'début'} au ${fin||'fin'}` : 'Toutes périodes';
+        
+        const motifs = [
+            { key: 'Inscription_RC', label: 'Inscription RC' },
+            { key: 'Denomination', label: 'Dénomination' },
+            { key: 'Renseignement', label: 'Renseignement' },
+            { key: 'Non spécifié', label: 'Non spécifié' }
+        ];
+        
+        const agentNom = currentUser ? `${currentUser.prenom} ${currentUser.nom}` : '-';
+        const agentService = currentUser ? currentUser.service : '-';
+        const agentDirection = currentUser ? currentUser.direction : '-';
+        
+        let html = `
+            <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div><strong>👤 Agent :</strong> ${agentNom}</div>
+                    <div><strong>🏢 Service :</strong> ${agentService}</div>
+                    <div><strong>📌 Direction :</strong> ${agentDirection}</div>
+                    <div><strong>📅 Période :</strong> ${debut || 'début'} → ${fin || 'fin'}</div>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Motif</th>
+                        <th>Nombre</th>
+                        <th>Pourcentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        const total = filtres.length;
+        motifs.forEach(m => {
+            const count = stats[m.key] || 0;
+            const pourcentage = total > 0 ? Math.round((count / total) * 100) : 0;
+            html += `<tr>
+                <td>${m.label}</td>
+                <td style="text-align:center; font-weight:bold;">${count}</td>
+                <td style="text-align:center;">${pourcentage}%</td>
+            </tr>`;
+        });
+        
+        html += `
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight:bold; background:#f0f0f0;">
+                        <td>TOTAL</td>
+                        <td style="text-align:center;">${total}</td>
+                        <td style="text-align:center;">100%</td>
+                    </tr>
+                </tfoot>
+            </table>
+        `;
+        
+        document.getElementById('statsEditionResult').innerHTML = html;
     }
     
-    // ==================== EXPORT / IMPORT ====================
-    function exporterCSV() {
-        const filtres = getVisiteursFiltres();
-        if (!filtres.length) { alert('Aucune donnée'); return; }
-        let csv = 'Agent;Service;Direction;Date;Visiteur;Statut;Société;N° RC;Motif;Code activité;Observation\n';
+    // ====================================================================
+    // 9. EXPORT STATISTIQUES EXCEL
+    // ====================================================================
+    function exporterStatistiquesExcel() {
+        const debut = document.getElementById('statsEditionDebut').value;
+        const fin = document.getElementById('statsEditionFin').value;
+        
+        let filtres = visiteurs;
+        if (debut) filtres = filtres.filter(v => v.date >= debut);
+        if (fin) filtres = filtres.filter(v => v.date <= fin);
+        
+        const stats = {};
         filtres.forEach(v => {
-            csv += `"${v.agentNom||''}";"${v.agentService||''}";"${v.agentDirection||''}";"${v.date||''}";"${v.nomPrenom||''}";"${getStatutTexte(v.statutVisiteur)}";"${v.nomSociete||''}";"${v.numRC||''}";"${getMotifTexte(v.motifVisite)}";"${v.codeActivite||''}";"${(v.observationGenerale||'').replace(/;/g,',')}"\n`;
+            const motif = v.motifVisite || 'Non spécifié';
+            if (!stats[motif]) stats[motif] = 0;
+            stats[motif]++;
         });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv' }));
-        a.download = `visiteurs_${new Date().toISOString().slice(0,10)}.csv`;
-        a.click();
-    }
-    
-    function exporterExcel() {
-        const filtres = getVisiteursFiltres();
-        if (!filtres.length) { alert('Aucune donnée'); return; }
-        const data = [['Agent', 'Service', 'Direction', 'Date', 'Visiteur', 'Statut', 'Société', 'N° RC', 'Motif', 'Code activité', 'Observation']];
-        filtres.forEach(v => {
-            data.push([v.agentNom||'', v.agentService||'', v.agentDirection||'', v.date||'', v.nomPrenom||'', getStatutTexte(v.statutVisiteur), v.nomSociete||'', v.numRC||'', getMotifTexte(v.motifVisite), v.codeActivite||'', v.observationGenerale||'']);
+        
+        const motifs = [
+            { key: 'Inscription_RC', label: 'Inscription RC' },
+            { key: 'Denomination', label: 'Dénomination' },
+            { key: 'Renseignement', label: 'Renseignement' },
+            { key: 'Non spécifié', label: 'Non spécifié' }
+        ];
+        
+        const total = filtres.length;
+        const data = [
+            ['STATISTIQUES PAR MOTIF'],
+            ['Agent', currentUser ? `${currentUser.prenom} ${currentUser.nom}` : '-'],
+            ['Service', currentUser ? currentUser.service : '-'],
+            ['Direction', currentUser ? currentUser.direction : '-'],
+            ['Période', `${debut || 'début'} → ${fin || 'fin'}`],
+            [],
+            ['Motif', 'Nombre', 'Pourcentage']
+        ];
+        
+        motifs.forEach(m => {
+            const count = stats[m.key] || 0;
+            const pourcentage = total > 0 ? Math.round((count / total) * 100) : 0;
+            data.push([m.label, count, pourcentage + '%']);
         });
+        
+        data.push([], ['TOTAL', total, '100%']);
+        
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.aoa_to_sheet(data);
-        ws['!cols'] = [{wch:20},{wch:20},{wch:20},{wch:12},{wch:25},{wch:15},{wch:25},{wch:18},{wch:18},{wch:12},{wch:30}];
+        ws['!cols'] = [{wch:30}, {wch:15}, {wch:15}];
+        XLSX.utils.book_append_sheet(wb, ws, 'Statistiques');
+        XLSX.writeFile(wb, `statistiques_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+    
+    // ====================================================================
+    // 10. IMPRESSION STATISTIQUES
+    // ====================================================================
+    function imprimerStatistiques() {
+        const content = document.getElementById('statsEditionResult');
+        if (!content || !content.innerHTML.trim()) {
+            alert('Veuillez d\'abord générer les statistiques');
+            return;
+        }
+        const win = window.open();
+        win.document.write(`
+            <html><head><title>Statistiques - AAPI</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h2 { color: #0056b3; }
+                table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+                th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+                th { background: #0056b3; color: white; }
+                .header-info { margin-bottom: 20px; }
+                .header-info div { padding: 5px 0; }
+                @media print { .no-print { display: none; } }
+            </style>
+            </head><body>
+            <h2>📊 Statistiques par motif</h2>
+            ${content.innerHTML}
+            <p style="margin-top: 20px; font-size: 11px; color: #666;">
+                Document généré le ${new Date().toLocaleDateString()} à ${new Date().toLocaleTimeString()}
+            </p>
+            </body></html>
+        `);
+        win.document.close();
+        win.print();
+    }
+    
+    // ====================================================================
+    // 11. EXPORT VISITEURS EXCEL
+    // ====================================================================
+    function exporterVisiteursExcel() {
+        const debut = document.getElementById('visiteursEditionDebut').value;
+        const fin = document.getElementById('visiteursEditionFin').value;
+        
+        let filtres = visiteurs;
+        if (debut) filtres = filtres.filter(v => v.date >= debut);
+        if (fin) filtres = filtres.filter(v => v.date <= fin);
+        
+        const agentNom = currentUser ? `${currentUser.prenom} ${currentUser.nom}` : '-';
+        const agentService = currentUser ? currentUser.service : '-';
+        const agentDirection = currentUser ? currentUser.direction : '-';
+        
+        const data = [
+            ['LISTE DES VISITEURS'],
+            ['Agent', agentNom],
+            ['Service', agentService],
+            ['Direction', agentDirection],
+            ['Période', `${debut || 'début'} → ${fin || 'fin'}`],
+            ['Total', filtres.length + ' visiteur(s)'],
+            [],
+            ['Date', 'Visiteur', 'Statut', 'Société', 'N° RC', 'Motif', 'Type Inscription', 'N° RC Inscription', 'Code activité', 'Libellé', 'Observation']
+        ];
+        
+        filtres.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+        
+        filtres.forEach(v => {
+            data.push([
+                v.date || '',
+                v.nomPrenom || '',
+                getStatutTexte(v.statutVisiteur) || '-',
+                v.nomSociete || '',
+                v.numRC || '',
+                getMotifTexte(v.motifVisite) || '-',
+                getTypeInscriptionTexte(v.typeInscription) || '-',
+                v.numRCInscription || '',
+                v.codeActivite || '',
+                v.libelleActivite || '',
+                v.observationGenerale || ''
+            ]);
+        });
+        
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        ws['!cols'] = [{wch:12}, {wch:25}, {wch:18}, {wch:25}, {wch:18}, {wch:18}, {wch:18}, {wch:18}, {wch:12}, {wch:35}, {wch:30}];
         XLSX.utils.book_append_sheet(wb, ws, 'Visiteurs');
         XLSX.writeFile(wb, `visiteurs_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
     
+    // ====================================================================
+    // 12. IMPRESSION VISITEURS
+    // ====================================================================
+    function imprimerVisiteurs() {
+        const debut = document.getElementById('visiteursEditionDebut').value;
+        const fin = document.getElementById('visiteursEditionFin').value;
+        
+        let filtres = visiteurs;
+        if (debut) filtres = filtres.filter(v => v.date >= debut);
+        if (fin) filtres = filtres.filter(v => v.date <= fin);
+        
+        if (filtres.length === 0) {
+            alert('Aucun visiteur trouvé pour cette période');
+            return;
+        }
+        
+        const agentNom = currentUser ? `${currentUser.prenom} ${currentUser.nom}` : '-';
+        const agentService = currentUser ? currentUser.service : '-';
+        const agentDirection = currentUser ? currentUser.direction : '-';
+        
+        filtres.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+        
+        let rows = '';
+        filtres.forEach(v => {
+            rows += `<tr>
+                <td>${v.date || ''}</td>
+                <td>${v.nomPrenom || ''}</td>
+                <td>${getStatutTexte(v.statutVisiteur) || '-'}</td>
+                <td>${v.nomSociete || ''}</td>
+                <td>${v.numRC || ''}</td>
+                <td>${getMotifTexte(v.motifVisite) || '-'}</td>
+                <td>${getTypeInscriptionTexte(v.typeInscription) || '-'}</td>
+                <td>${v.numRCInscription || ''}</td>
+                <td>${v.codeActivite || ''}</td>
+                <td>${v.libelleActivite || ''}</td>
+                <td>${v.observationGenerale || ''}</td>
+            </tr>`;
+        });
+        
+        const win = window.open();
+        win.document.write(`
+            <html><head><title>Liste des visiteurs - AAPI</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h2 { color: #0056b3; }
+                table { border-collapse: collapse; width: 100%; margin-top: 15px; font-size: 12px; }
+                th, td { border: 1px solid #333; padding: 6px; text-align: left; }
+                th { background: #0056b3; color: white; }
+                .header-info { margin-bottom: 20px; }
+                .header-info div { padding: 3px 0; }
+            </style>
+            </head><body>
+            <h2>📋 Liste des visiteurs</h2>
+            <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; border:1px solid #ddd;">
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div><strong>👤 Agent :</strong> ${agentNom}</div>
+                    <div><strong>🏢 Service :</strong> ${agentService}</div>
+                    <div><strong>📌 Direction :</strong> ${agentDirection}</div>
+                    <div><strong>📅 Période :</strong> ${debut || 'début'} → ${fin || 'fin'}</div>
+                    <div><strong>📋 Total :</strong> ${filtres.length} visiteur(s)</div>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Visiteur</th>
+                        <th>Statut</th>
+                        <th>Société</th>
+                        <th>N° RC</th>
+                        <th>Motif</th>
+                        <th>Type Ins.</th>
+                        <th>N° RC Ins.</th>
+                        <th>Code</th>
+                        <th>Libellé</th>
+                        <th>Obs.</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <p style="margin-top: 20px; font-size: 11px; color: #666;">
+                Document généré le ${new Date().toLocaleDateString()} à ${new Date().toLocaleTimeString()}
+            </p>
+            </body></html>
+        `);
+        win.document.close();
+        win.print();
+    }
+    
+    // ====================================================================
+    // 13. EXPORT EXCEL (TOUS LES VISITEURS)
+    // ====================================================================
+    function exporterExcel() {
+        if (visiteurs.length === 0) { alert('Aucune donnée'); return; }
+        const data = [
+            ['Date', 'Visiteur', 'Date naissance', 'Lieu naissance', 'Statut', 'Société', 'N° RC', 'Motif', 'Type Inscription', 'N° RC Inscription', 'Code activité', 'Libellé activité', 'N° Dénomination', 'Libellé Dénomination', 'Observation']
+        ];
+        visiteurs.forEach(v => {
+            data.push([
+                v.date || '',
+                v.nomPrenom || '',
+                v.dateNaissance || '',
+                v.lieuNaissance || '',
+                getStatutTexte(v.statutVisiteur) || '-',
+                v.nomSociete || '',
+                v.numRC || '',
+                getMotifTexte(v.motifVisite) || '-',
+                getTypeInscriptionTexte(v.typeInscription) || '-',
+                v.numRCInscription || '',
+                v.codeActivite || '',
+                v.libelleActivite || '',
+                v.numDenomination || '',
+                v.libelleDenomination || '',
+                v.observationGenerale || ''
+            ]);
+        });
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        ws['!cols'] = [{wch:12},{wch:25},{wch:12},{wch:15},{wch:18},{wch:25},{wch:18},{wch:18},{wch:18},{wch:18},{wch:12},{wch:45},{wch:15},{wch:25},{wch:30}];
+        XLSX.utils.book_append_sheet(wb, ws, 'Visiteurs');
+        XLSX.writeFile(wb, `visiteurs_complet_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+    
+    // ====================================================================
+    // 14. IMPORT EXCEL (AVEC CONVERSION DES LIBELLÉS)
+    // ====================================================================
     function importerExcel() {
         const input = document.createElement('input');
         input.type = 'file';
@@ -837,26 +1227,59 @@
             if (!file) return;
             const reader = new FileReader();
             reader.onload = ev => {
-                const data = new Uint8Array(ev.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
-                const nouvelles = [];
-                for (let i = 1; i < rows.length; i++) {
-                    const r = rows[i];
-                    if (r[0]) nouvelles.push({
-                        agentNom: r[0]||'', agentService: r[1]||'', agentDirection: r[2]||'', date: r[3]||'',
-                        nomPrenom: r[4]?String(r[4]).trim().toUpperCase():'', statutVisiteur: '', nomSociete: r[5]||'',
-                        numRC: r[6]||'', motifVisite: '', codeActivite: r[7]||'', observationGenerale: r[8]||'',
-                        dateNaissance: '', lieuNaissance: '', typeInscription: '', numRCInscription: '',
-                        libelleActivite: '', numDenomination: '', libelleDenomination: ''
-                    });
-                }
-                if (nouvelles.length && confirm(`${nouvelles.length} enregistrements trouvés. Remplacer ?`)) {
-                    visiteurs = nouvelles;
-                    localStorage.setItem('visiteurs_aapi', JSON.stringify(visiteurs));
-                    afficherTableau();
-                    calculerStatistiques();
-                    alert(`✅ ${visiteurs.length} importés`);
+                try {
+                    const data = new Uint8Array(ev.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    
+                    if (rows.length < 2) {
+                        alert('Fichier vide ou invalide');
+                        return;
+                    }
+                    
+                    const nouvelles = [];
+                    for (let i = 1; i < rows.length; i++) {
+                        const r = rows[i];
+                        if (r[0]) {
+                            nouvelles.push({
+                                date: r[0] || '',
+                                nomPrenom: r[1] ? String(r[1]).trim().toUpperCase() : '',
+                                dateNaissance: r[2] || '',
+                                lieuNaissance: r[3] ? String(r[3]).trim().toUpperCase() : '',
+                                statutVisiteur: convertirLibelleVersCode(r[4], 'statut') || '',
+                                nomSociete: r[5] ? String(r[5]).trim().toUpperCase() : '',
+                                numRC: r[6] || '',
+                                motifVisite: convertirLibelleVersCode(r[7], 'motif') || '',
+                                typeInscription: convertirLibelleVersCode(r[8], 'typeInscription') || '',
+                                numRCInscription: r[9] || '',
+                                codeActivite: r[10] || '',
+                                libelleActivite: r[11] || '',
+                                numDenomination: r[12] || '',
+                                libelleDenomination: r[13] ? String(r[13]).trim().toUpperCase() : '',
+                                observationGenerale: r[14] || '',
+                                agentNom: '',
+                                agentService: '',
+                                agentDirection: ''
+                            });
+                        }
+                    }
+                    
+                    if (nouvelles.length === 0) {
+                        alert('Aucune donnée valide trouvée dans le fichier');
+                        return;
+                    }
+                    
+                    if (confirm(`${nouvelles.length} enregistrements trouvés. Remplacer les données actuelles ?`)) {
+                        visiteurs = nouvelles;
+                        localStorage.setItem('visiteurs_aapi', JSON.stringify(visiteurs));
+                        afficherTableau();
+                        editerStatistiques();
+                        alert(`✅ ${visiteurs.length} enregistrements importés avec succès !`);
+                    }
+                } catch(err) {
+                    alert('Erreur lors de la lecture du fichier: ' + err.message);
+                    console.error(err);
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -864,6 +1287,9 @@
         input.click();
     }
     
+    // ====================================================================
+    // 15. AUTRES FONCTIONS
+    // ====================================================================
     function reinitialiserRecherche() {
         document.getElementById('searchInput').value = '';
         filtreRecherche = '';
@@ -876,23 +1302,28 @@
         let rows = '';
         filtres.forEach(v => {
             rows += `<tr>
-                <td>${v.agentNom||''}</td>
-                <td>${v.agentService||''}</td>
                 <td>${v.date||''}</td>
                 <td>${v.nomPrenom||''}</td>
-                <td>${getStatutTexte(v.statutVisiteur)}</td>
+                <td>${getStatutTexte(v.statutVisiteur) || '-'}</td>
+                <td>${v.nomSociete||''}</td>
                 <td>${v.numRC||''}</td>
-                <td>${getMotifTexte(v.motifVisite)}</td>
+                <td>${getMotifTexte(v.motifVisite) || '-'}</td>
                 <td>${v.codeActivite||''}</td>
                 <td>${v.observationGenerale||''}</td>
             </tr>`;
         });
         const win = window.open();
-        win.document.write(`<html><head><title>Visiteurs - AAPI</title><style>table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:5px} th{background:#0056b3;color:white}</style></head><body><h2>Liste des visiteurs - AAPI</h2><h3>${new Date().toLocaleDateString()}</h3><table><thead><tr><th>Agent</th><th>Service</th><th>Date</th><th>Visiteur</th><th>Statut</th><th>N° RC</th><th>Motif</th><th>Code</th><th>Obs.</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
+        win.document.write(`<html><head><title>Visiteurs - AAPI</title>
+            <style>table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:5px} th{background:#0056b3;color:white}</style>
+            </head><body><h2>Liste des visiteurs - AAPI</h2>
+            <h3>${new Date().toLocaleDateString()}</h3>
+            <table><thead><tr><th>Date</th><th>Visiteur</th><th>Statut</th><th>Société</th><th>N° RC</th><th>Motif</th><th>Code</th><th>Obs.</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
         win.print();
     }
     
-    // ==================== ÉVÉNEMENTS ====================
+    // ====================================================================
+    // 16. ÉVÉNEMENTS FORMULAIRES
+    // ====================================================================
     document.getElementById('statutVisiteur').addEventListener('change', function() {
         const val = this.value;
         if (val === 'RC_Personne_Physique' || val === 'RC_Personne_Morale') {
@@ -937,13 +1368,16 @@
         }
     });
     
-    // ==================== INITIALISATION ====================
+    // ====================================================================
+    // 17. INITIALISATION
+    // ====================================================================
     function initialiserApp() {
         afficherTableau();
-        calculerStatistiques();
         const today = new Date().toISOString().split('T')[0];
-        document.getElementById('statsDateDebut').value = today;
-        document.getElementById('statsDateFin').value = today;
+        document.getElementById('statsEditionDebut').value = '';
+        document.getElementById('statsEditionFin').value = '';
+        document.getElementById('visiteursEditionDebut').value = '';
+        document.getElementById('visiteursEditionFin').value = '';
         
         document.getElementById('searchInput').addEventListener('input', function(e) {
             filtreRecherche = this.value.trim();
@@ -951,6 +1385,8 @@
         });
         
         document.getElementById('submitBtn').disabled = false;
+        
+        editerStatistiques();
     }
     
     // Démarrer
