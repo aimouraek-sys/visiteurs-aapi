@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Registre des visiteurs - AAPI</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #e9ecef; margin: 0; padding: 20px; min-height: 100vh; }
+        .container { max-width: 1500px; margin: auto; }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .login-container h2 { text-align: center; color: #0056b3; margin-bottom: 20px; }
+        .login-container input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .login-container button { width: 100%; padding: 12px; background: #0056b3; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        .login-container button:hover { background: #004099; }
+        .login-error { color: red; text-align: center; margin-top: 10px; display: none; }
+        
+        .user-info {
+            background: #e8f4fd;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .user-info .role { font-size: 12px; padding: 3px 8px; border-radius: 20px; background: #0056b3; color: white; }
+        .user-info .role.admin { background: #c62828; }
+        .user-info .role.user { background: #2e7d32; }
+        .logout-btn { background: #dc3545; padding: 5px 12px; border-radius: 6px; color: white; cursor: pointer; font-size: 12px; }
+        .logout-btn:hover { background: #c82333; }
+        
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .form-card h2 { color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-top: 0; text-align: center; }
+        .sous-titre { text-align: center; color: #666; font-size: 14px; margin-top: -10px; margin-bottom: 20px; }
+        
+        .form-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; }
+        .form-group { flex: 1; min-width: 200px; }
+        .full-width { flex: 100%; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #0056b3; box-shadow: 0 0 5px rgba(0,86,179,0.3); }
+        textarea { resize: vertical; font-family: inherit; }
+        
+        .btn { background: #0056b3; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .btn:hover { background: #004099; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-info:hover { background: #138496; }
+        
+        .btn-action { padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; border: none; }
+        .btn-edit { background: #ffc107; color: #333; }
+        .btn-edit:hover { background: #e0a800; }
+        .btn-delete { background: #dc3545; color: white; }
+        .btn-delete:hover { background: #c82333; }
+        .action-buttons { display: flex; gap: 4px; white-space: nowrap; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        
+        .agent-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .agent-info .row { display: flex; gap: 15px; flex-wrap: wrap; }
+        .agent-info .item { flex: 1; min-width: 150px; }
+        .agent-info .label { font-size: 11px; color: #666; }
+        .agent-info .value { font-weight: bold; color: #0056b3; font-size: 14px; }
+        
+        .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+        .search-bar input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+        .search-icon, .clear-search { padding: 10px 15px; border-radius: 8px; cursor: pointer; background: #0056b3; color: white; text-align: center; }
+        .clear-search { background: #6c757d; }
+        .search-info { font-size: 12px; margin-bottom: 10px; display: none; }
+        
+        .table-wrapper { max-height: 500px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: top; }
+        th { background: #0056b3; color: white; position: sticky; top: 0; }
+        .badge-count { background: #28a745; color: white; padding: 2px 8px; border-radius: 20px; font-size: 11px; margin-left: 10px; }
+        
+        .stats-container { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .stat-box { background: #f8f9fa; border-radius: 10px; padding: 15px; text-align: center; min-width: 120px; }
+        .stat-number { font-size: 28px; font-weight: bold; color: #0056b3; }
+        .stat-label { font-size: 12px; color: #666; }
+        
+        .edition-section {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .edition-section h3 {
+            color: #0056b3;
+            margin-top: 0;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        .edition-filters {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .edition-filters .form-group { margin-bottom: 0; min-width: 150px; }
+        .edition-filters button { white-space: nowrap; }
+        .edition-result { margin-top: 15px; overflow-x: auto; }
+        .edition-result table { font-size: 12px; }
+        .edition-result table th { background: #0056b3; color: white; }
+        
+        .info-format { font-size: 11px; color: #666; margin-top: 4px; }
+        .info-note { background: #fff3cd; padding: 10px; border-radius: 6px; font-size: 12px; margin-top: 15px; text-align: center; }
+        .edit-mode-indicator { background: #ffc107; padding: 8px; border-radius: 6px; text-align: center; display: none; margin-bottom: 15px; font-weight: bold; }
+        .error { color: red; font-size: 12px; display: none; }
+        .search-result { background: #d4edda; border: 1px solid #c3e6cb; padding: 8px; border-radius: 6px; margin-top: 5px; font-size: 12px; display: none; }
+        .relative { position: relative; }
+        .code-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 250px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            z-index: 1000;
+        }
+        .suggestion-item { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 12px; }
+        .suggestion-item:hover { background: #0056b3; color: white; }
+        .import-card { background: #e8f4fd; border: 1px dashed #0056b3; border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: center; }
+        .import-status { margin-top: 10px; font-size: 13px; }
+        .observation-generale { background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-top: 10px; }
+        hr { margin: 15px 0; border: none; border-top: 1px solid #ddd; }
+        
+        @media (max-width: 768px) { .form-group { min-width: 100%; } }
+    </style>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- PAGE DE CONNEXION -->
+<div id="loginPage" class="login-container">
+    <h2>🔐 Registre des visiteurs</h2>
+    <div style="text-align:center; font-size:13px; color:#666; margin-bottom:20px;">AAPI - Agence Nationale de Promotion de l'Investissement</div>
+    <input type="text" id="loginUser" placeholder="Nom d'utilisateur">
+    <input type="password" id="loginPassword" placeholder="Mot de passe">
+    <button onclick="authentifier()">Se connecter</button>
+    <div id="loginError" class="login-error">❌ Identifiants incorrects</div>
+</div>
+
+<!-- APPLICATION PRINCIPALE -->
+<div id="appContainer" style="display:none;">
+<div class="container">
+    
+    <!-- EN-TÊTE UTILISATEUR -->
+    <div class="user-info">
+        <div>👤 <strong id="currentUser"></strong> <span id="currentUserRole" class="role"></span></div>
+        <div>
+            <a href="admin.html" target="_blank" style="color:#0056b3; text-decoration:none; margin-right:15px; font-size:13px;">⚙️ Administration</a>
+            <span class="logout-btn" onclick="deconnecter()">🚪 Déconnexion</span>
+        </div>
+    </div>
+    
+    <!-- ============================================================ -->
+    <!-- 1. FORMULAIRE D'ENREGISTREMENT                               -->
+    <!-- ============================================================ -->
+    <div class="form-card">
+        <h2>📋 Enregistrement Visiteur</h2>
+        <div class="sous-titre">AAPI - Agence Nationale de Promotion de l'Investissement</div>
+        
+        <div class="agent-info" id="agentInfo">
+            <div class="row">
+                <div class="item"><div class="label">👤 Agent</div><div class="value" id="agentNom">-</div></div>
+                <div class="item"><div class="label">🏢 Service</div><div class="value" id="agentService">-</div></div>
+                <div class="item"><div class="label">📌 Direction</div><div class="value" id="agentDirection">-</div></div>
+            </div>
+        </div>
+        
+        <div id="editModeIndicator" class="edit-mode-indicator">✏️ MODE ÉDITION - Modification en cours</div>
+        
+        <div class="import-card">
+            <strong>📂 Chargement du fichier des activités</strong><br>
+            <input type="file" id="excelFile" accept=".xlsx, .xls, .csv">
+            <div id="importStatus" class="import-status"></div>
+            <div class="info-format">Fichier Excel avec 2 colonnes : Code activité | Libellé</div>
+        </div>
+        
+        <form id="visiteurForm">
+            <input type="hidden" id="editIndex" value="-1">
+            
+            <div class="form-row">
+                <div class="form-group"><label>📅 Date de la visite</label><input type="date" id="dateVisite"></div>
+                <div class="form-group"><label>👤 Nom et Prénom du visiteur</label><input type="text" id="nomPrenom" placeholder="Ex: DUPONT Jean"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>📅 Date de naissance</label><input type="date" id="dateNaissance"></div>
+                <div class="form-group"><label>📍 Lieu de naissance</label><input type="text" id="lieuNaissance" placeholder="Ex: Alger"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>🏷️ Statut du visiteur</label>
+                    <select id="statutVisiteur">
+                        <option value="">-- Sélectionnez --</option>
+                        <option value="RC_Personne_Physique">📄 RC Personne Physique</option>
+                        <option value="RC_Personne_Morale">🏢 RC Personne Morale</option>
+                        <option value="Non_commercant">🛒 Non commerçant</option>
+                    </select>
+                </div>
+                <div class="form-group" id="societeField" style="display:none;"><label>🏢 Nom de la société</label><input type="text" id="nomSociete"></div>
+            </div>
+            
+            <div id="rcField" style="display:none;">
+                <div class="form-group">
+                    <label>🔢 N° Registre de commerce</label>
+                    <input type="text" id="numRC" placeholder="Ex: 01A123456789">
+                    <div class="info-format" id="rcFormatInfo">Format: 2 chiffres + A ou B + 9 chiffres (ex: 01A123456789)</div>
+                    <div id="rcError" class="error">Format invalide. Exemple: 01A123456789 (2 chiffres + A/B + 9 chiffres)</div>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>🎯 Motif de la visite</label>
+                    <select id="motifVisite">
+                        <option value="">-- Sélectionnez --</option>
+                        <option value="Inscription_RC">📝 Inscription RC</option>
+                        <option value="Denomination">🏷️ Dénomination</option>
+                        <option value="Renseignement">📞 Renseignement</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="sousMenuInscription" style="display:none;">
+                <div class="form-group">
+                    <label>📌 Type d'inscription</label>
+                    <select id="typeInscription">
+                        <option value="">-- Sélectionnez --</option>
+                        <option value="Immatriculation_Principale">1- Immatriculation Principale</option>
+                        <option value="Modification_Principale">2- Modification Principale</option>
+                        <option value="Immatriculation_Secondaire">3- Immatriculation Secondaire</option>
+                        <option value="Modification_Secondaire">4- Modification Secondaire</option>
+                        <option value="Radiation">5- Radiation</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="inscriptionRCFields" style="display:none;">
+                <div class="form-row">
+                    <div class="form-group"><label>🔢 N° RC (pour inscription)</label><input type="text" id="numRCInscription" placeholder="Ex: 01A123456789"></div>
+                    <div class="form-group">
+                        <label>🔍 Code activité</label>
+                        <div class="relative">
+                            <input type="text" id="codeActivite" placeholder="Tapez code ou libellé">
+                            <div id="suggestions" class="code-suggestions" style="display:none;"></div>
+                        </div>
+                        <div id="activiteInfo" class="search-result"></div>
+                        <div id="codeError" class="error">Code activité non trouvé</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="denominationFields" style="display:none;">
+                <div class="form-row">
+                    <div class="form-group"><label>🔢 Numéro dénomination</label><input type="text" id="numDenomination"></div>
+                    <div class="form-group"><label>📝 Libellé dénomination</label><input type="text" id="libelleDenomination"></div>
+                </div>
+            </div>
+            
+            <div id="renseignementFields" style="display:none;">
+                <div class="form-group">
+                    <label>🔍 Code activité</label>
+                    <div class="relative">
+                        <input type="text" id="codeActiviteRenseignement" placeholder="Tapez code ou libellé">
+                        <div id="suggestionsRenseignement" class="code-suggestions" style="display:none;"></div>
+                    </div>
+                    <div id="activiteInfoRenseignement" class="search-result"></div>
+                </div>
+            </div>
+            
+            <div class="observation-generale">
+                <div class="form-group full-width">
+                    <label>📝 Observation générale</label>
+                    <textarea id="observationGenerale" rows="2" placeholder="Information complémentaire..."></textarea>
+                </div>
+            </div>
+            
+            <div class="info-note">ℹ️ Tous les champs sont optionnels</div>
+            <hr>
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn" id="submitBtn" style="flex:2">✅ Enregistrer</button>
+                <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display:none; flex:1">❌ Annuler</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- ============================================================ -->
+    <!-- 2. ÉDITION DES STATISTIQUES                                  -->
+    <!-- ============================================================ -->
+    <div class="edition-section">
+        <h3>📊 Édition des statistiques par motif</h3>
+        <div class="edition-filters">
+            <div class="form-group"><label>Date début</label><input type="date" id="statsEditionDebut"></div>
+            <div class="form-group"><label>Date fin</label><input type="date" id="statsEditionFin"></div>
+            <button class="btn btn-info" onclick="editerStatistiques()">📊 Générer</button>
+            <button class="btn btn-success" onclick="exporterStatistiquesExcel()">📊 Excel</button>
+            <button class="btn btn-secondary" onclick="imprimerStatistiques()">🖨️ Imprimer</button>
+        </div>
+        <div id="statsEditionResult" class="edition-result"></div>
+    </div>
+    
+    <!-- ============================================================ -->
+    <!-- 3. ÉDITION DES VISITEURS (EXCEL + IMPRESSION)               -->
+    <!-- ============================================================ -->
+    <div class="edition-section">
+        <h3>📋 Édition des visiteurs par date</h3>
+        <div class="edition-filters">
+            <div class="form-group"><label>Date début</label><input type="date" id="visiteursEditionDebut"></div>
+            <div class="form-group"><label>Date fin</label><input type="date" id="visiteursEditionFin"></div>
+            <button class="btn btn-success" onclick="exporterVisiteursExcel()">📊 Exporter Excel</button>
+            <button class="btn btn-secondary" onclick="imprimerVisiteurs()">🖨️ Imprimer</button>
+        </div>
+        <div id="visiteursEditionResult" class="edition-result" style="display:none;"></div>
+    </div>
+    
+    <!-- ============================================================ -->
+    <!-- 4. LISTE COMPLÈTE DES VISITEURS                            -->
+    <!-- ============================================================ -->
+    <div class="form-card" style="background:white; border-radius:12px; padding:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1); margin-bottom:30px;">
+        <h3 style="margin-top:0; color:#0056b3;">📊 Visiteurs enregistrés <span id="nbVisiteurs" class="badge-count">0</span></h3>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="🔍 Rechercher par nom...">
+            <span class="search-icon">🔍</span>
+            <span class="clear-search" onclick="reinitialiserRecherche()">✖ Effacer</span>
+        </div>
+        <div id="searchInfo" class="search-info"></div>
+        <div class="table-wrapper">
+            <table id="tableVisiteurs">
+                <thead>
+                    <tr>
+                        <th style="width:70px">Actions</th>
+                        <th>Date</th>
+                        <th>Visiteur</th>
+                        <th>Naiss.</th>
+                        <th>Lieu</th>
+                        <th>Statut</th>
+                        <th>Société</th>
+                        <th>N° RC</th>
+                        <th>Motif</th>
+                        <th>Type Ins.</th>
+                        <th>N° RC Ins.</th>
+                        <th>Code activité</th>
+                        <th>Libellé</th>
+                        <th>N° Dén.</th>
+                        <th>Libellé Dén.</th>
+                        <th>Obs.</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-success" onclick="exporterExcel()">📊 Exporter Excel (tous)</button>
+            <button class="btn btn-warning" onclick="importerExcel()">📂 Importer Excel</button>
+            <button class="btn btn-secondary" onclick="imprimerListe()">🖨️ Imprimer</button>
+        </div>
+        <div class="info-note">
+            💾 Sauvegarde automatique | ✏️ Modifier: <span style="background:#ffc107; padding:2px 6px;">✏️</span> | 🗑️ Supprimer: <span style="background:#dc3545; padding:2px 6px; color:white;">🗑️</span><br>
+            🔐 Déconnexion automatique après 5 minutes d'inactivité
+        </div>
+    </div>
+    
+</div>
+</div>
+
+<script>
+    // ====================================================================
+    // 1. AUTHENTIFICATION
+    // ====================================================================
+    let agents = [];
+    let currentUser = null;
+    
+    function chargerAgents() {
+        const saved = localStorage.getItem('agents_aapi');
+        if (saved) {
+            agents = JSON.parse(saved);
+        } else {
+            agents = [{ nom: 'Administrateur', prenom: 'AAPI', service: 'Administration', direction: 'Direction Générale', login: 'admin', password: 'Admin2026Secure!', role: 'admin' }];
+            localStorage.setItem('agents_aapi', JSON.stringify(agents));
+        }
+        return agents;
+    }
+    
+    function authentifier() {
+        const login = document.getElementById('loginUser').value.trim().toLowerCase();
+        const pwd = document.getElementById('loginPassword').value;
+        
+        const agent = agents.find(a => a.login === login && a.password === pwd);
+        if (agent) {
+            currentUser = agent;
+            localStorage.setItem('currentUser_aapi', login);
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            document.getElementById('currentUser').innerText = `${agent.prenom} ${agent.nom}`;
+            const roleSpan = document.getElementById('currentUserRole');
+            roleSpan.innerText = agent.role === 'admin' ? 'Administrateur' : 'Agent';
+            roleSpan.className = 'role ' + (agent.role === 'admin' ? 'admin' : 'user');
+            chargerAgentInfo();
+            initialiserApp();
+            resetInactivityTimer();
+        } else {
+            document.getElementById('loginError').style.display = 'block';
+        }
+    }
+    
+    function deconnecter() {
+        localStorage.removeItem('currentUser_aapi');
+        currentUser = null;
+        document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('loginPage').style.display = 'block';
+        document.getElementById('loginUser').value = '';
+        document.getElementById('loginPassword').value = '';
+        clearTimeout(inactivityTimer);
+    }
+    
+    function checkSession() {
+        chargerAgents();
+        const saved = localStorage.getItem('currentUser_aapi');
+        if (saved) {
+            const agent = agents.find(a => a.login === saved);
+            if (agent) {
+                currentUser = agent;
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                document.getElementById('currentUser').innerText = `${agent.prenom} ${agent.nom}`;
+                const roleSpan = document.getElementById('currentUserRole');
+                roleSpan.innerText = agent.role === 'admin' ? 'Administrateur' : 'Agent';
+                roleSpan.className = 'role ' + (agent.role === 'admin' ? 'admin' : 'user');
+                chargerAgentInfo();
+                initialiserApp();
+                resetInactivityTimer();
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    function chargerAgentInfo() {
+        if (currentUser) {
+            document.getElementById('agentNom').innerText = `${currentUser.prenom} ${currentUser.nom}`;
+            document.getElementById('agentService').innerText = currentUser.service || '-';
+            document.getElementById('agentDirection').innerText = currentUser.direction || '-';
+        }
+    }
+    
+    // ====================================================================
+    // 2. DÉCONNEXION AUTOMATIQUE
+    // ====================================================================
+    let inactivityTimer;
+    const INACTIVITY_DELAY = 5 * 60 * 1000;
+    
+    function resetInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            if (currentUser) {
+                const stay = confirm('🔐 Inactivité prolongée (5 minutes).\nVoulez-vous rester connecté ?');
+                if (stay) resetInactivityTimer();
+                else deconnecter();
+            }
+        }, INACTIVITY_DELAY);
+    }
+    
+    document.addEventListener('mousemove', () => { if (currentUser) resetInactivityTimer(); });
+    document.addEventListener('keydown', () => { if (currentUser) resetInactivityTimer(); });
+    document.addEventListener('click', () => { if (currentUser) resetInactivityTimer(); });
+    
+    // ====================================================================
+    // 3. VARIABLES ET FONCTIONS UTILITAIRES
+    // ====================================================================
+    let codesActivites = [];
+    let activiteMap = new Map();
+    let visiteurs = JSON.parse(localStorage.getItem('visiteurs_aapi')) || [];
+    let editMode = false;
+    let filtreRecherche = '';
+    
+    function validerRC(rc) {
+        if (!rc) return true;
+        return /^\d{2}[AB]\d{9}$/.test(rc.trim().toUpperCase());
+    }
+    
+    function nettoyerRC(rc) {
+        if (!rc) return '';
+        return rc.trim().toUpperCase();
+    }
+    
+    function getStatutTexte(s) {
+        if (s === 'RC_Personne_Physique') return 'RC Personne Physique';
+        if (s === 'RC_Personne_Morale') return 'RC Personne Morale';
+        if (s === 'Non_commercant') return 'Non commerçant';
+        return s || '';
+    }
+    
+    function getMotifTexte(m) {
+        if (m === 'Inscription_RC') return 'Inscription RC';
+        if (m === 'Denomination') return 'Dénomination';
+        if (m === 'Renseignement') return 'Renseignement';
+        return m || '';
+    }
+    
+    function getTypeInscriptionTexte(t) {
+        const types = {
+            'Immatriculation_Principale': 'Immatric. Princ.',
+            'Modification_Principale': 'Modif. Princ.',
+            'Immatriculation_Secondaire': 'Immatric. Sec.',
+            'Modification_Secondaire': 'Modif. Sec.',
+            'Radiation': 'Radiation'
+        };
+        return types[t] || t || '';
+    }
+    
+    // Conversion des libellés en codes (pour l'import Excel)
+    function convertirLibelleVersCode(valeur, type) {
+        if (!valeur) return '';
+        valeur = valeur.trim();
+        
+        if (type === 'statut') {
+            const map = {
+                'RC Personne Physique': 'RC_Personne_Physique',
+                'RC Personne Morale': 'RC_Personne_Morale',
+                'Non commerçant': 'Non_commercant'
+            };
+            return map[valeur] || valeur;
+        }
+        
+        if (type === 'motif') {
+            const map = {
+                'Inscription RC': 'Inscription_RC',
+                'Dénomination': 'Denomination',
+                'Renseignement': 'Renseignement'
+            };
+            return map[valeur] || valeur;
+        }
+        
+        if (type === 'typeInscription') {
+            const map = {
+                'Immatriculation Principale': 'Immatriculation_Principale',
+                'Modification Principale': 'Modification_Principale',
+                'Immatriculation Secondaire': 'Immatriculation_Secondaire',
+                'Modification Secondaire': 'Modification_Secondaire',
+                'Radiation': 'Radiation'
+            };
+            return map[valeur] || valeur;
+        }
+        
+        return valeur;
+    }
+    
+    function rechercherActivites(terme) {
+        if (!terme || terme.trim() === '') return [];
+        terme = terme.toLowerCase().trim();
+        return codesActivites.filter(a => a.code.toLowerCase().includes(terme) || a.libelle.toLowerCase().includes(terme));
+    }
+    
+    function setupAutocomplete(inputId, suggestionsId, infoId, errorId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        
+        input.addEventListener('input', function() {
+            const terme = this.value.trim();
+            const suggestionsDiv = document.getElementById(suggestionsId);
+            const infoDiv = document.getElementById(infoId);
+            const errorDiv = errorId ? document.getElementById(errorId) : null;
+            
+            if (terme.length < 1) {
+                if (suggestionsDiv) suggestionsDiv.style.display = 'none';
+                if (infoDiv) infoDiv.style.display = 'none';
+                if (errorDiv) errorDiv.style.display = 'none';
+                return;
+            }
+            
+            const resultats = rechercherActivites(terme);
+            
+            if (resultats.length > 0) {
+                if (suggestionsDiv) {
+                    suggestionsDiv.innerHTML = '';
+                    resultats.slice(0, 15).forEach(r => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        div.innerHTML = `<span style="font-weight:bold; font-family:monospace;">${r.code}</span> - ${r.libelle.substring(0, 80)}`;
+                        div.onclick = () => {
+                            input.value = r.code;
+                            suggestionsDiv.style.display = 'none';
+                            if (infoDiv) {
+                                infoDiv.style.display = 'block';
+                                infoDiv.innerHTML = `✅ <strong>${r.code}</strong> : ${r.libelle}`;
+                            }
+                            if (errorDiv) errorDiv.style.display = 'none';
+                        };
+                        div.onmouseover = () => { div.style.background = '#0056b3'; div.style.color = 'white'; };
+                        div.onmouseout = () => { div.style.background = 'white'; div.style.color = 'black'; };
+                        suggestionsDiv.appendChild(div);
+                    });
+                    suggestionsDiv.style.display = 'block';
+                }
+            } else if (activiteMap.has(terme.toUpperCase())) {
+                if (suggestionsDiv) suggestionsDiv.style.display = 'none';
+                if (infoDiv) {
+                    infoDiv.style.display = 'block';
+                    infoDiv.innerHTML = `✅ <strong>${terme.toUpperCase()}</strong> : ${activiteMap.get(terme.toUpperCase())}`;
+                }
+                if (errorDiv) errorDiv.style.display = 'none';
+            } else {
+                if (suggestionsDiv) suggestionsDiv.style.display = 'none';
+                if (infoDiv) infoDiv.style.display = 'none';
+                if (errorDiv) errorDiv.style.display = 'block';
+            }
+        });
+    }
+    
+    // ====================================================================
+    // 4. CHARGEMENT EXCEL ACTIVITÉS
+    // ====================================================================
+    document.getElementById('excelFile').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const statusDiv = document.getElementById('importStatus');
+        statusDiv.innerHTML = '⏳ Chargement en cours...';
+        statusDiv.style.color = 'black';
+        
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+            
+            codesActivites = [];
+            activiteMap.clear();
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                if (row.length >= 2) {
+                    let code = String(row[0]).trim();
+                    let libelle = String(row[1]).trim();
+                    if (code && libelle && code !== 'Code Activité' && code !== 'CODE' && code !== 'code') {
+                        codesActivites.push({ code: code, libelle: libelle });
+                        activiteMap.set(code, libelle);
+                    }
+                }
+            }
+            
+            if (codesActivites.length > 0) {
+                statusDiv.innerHTML = `✅ Chargé avec succès : ${codesActivites.length} codes activités`;
+                statusDiv.style.color = 'green';
+                document.getElementById('submitBtn').disabled = false;
+                setupAutocomplete('codeActivite', 'suggestions', 'activiteInfo', 'codeError');
+                setupAutocomplete('codeActiviteRenseignement', 'suggestionsRenseignement', 'activiteInfoRenseignement', null);
+            } else {
+                statusDiv.innerHTML = '❌ Aucune donnée trouvée. Format: Code | Libellé';
+                statusDiv.style.color = 'red';
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+    
+    // ====================================================================
+    // 5. AFFICHAGE TABLEAU DES VISITEURS
+    // ====================================================================
+    function getVisiteursFiltres() {
+        if (!filtreRecherche) return visiteurs;
+        return visiteurs.filter(v => v.nomPrenom && v.nomPrenom.toLowerCase().includes(filtreRecherche.toLowerCase()));
+    }
+    
+    function afficherTableau() {
+        const tbody = document.querySelector('#tableVisiteurs tbody');
+        const filtres = getVisiteursFiltres();
+        tbody.innerHTML = '';
+        
+        if (filtres.length === 0 && visiteurs.length > 0) {
+            tbody.innerHTML = '<tr><td colspan="16" style="text-align:center">🔍 Aucun résultat</td></tr>';
+        } else if (filtres.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="16" style="text-align:center">Aucun visiteur enregistré</td></tr>';
+        } else {
+            filtres.forEach(v => {
+                const idx = visiteurs.findIndex(orig => orig === v);
+                const libelle = activiteMap.get(v.codeActivite) || v.libelleActivite || '';
+                tbody.innerHTML += `<tr>
+                    <td class="action-buttons">
+                        <button class="btn-action btn-edit" onclick="modifierVisiteur(${idx})" title="Modifier">✏️</button>
+                        <button class="btn-action btn-delete" onclick="supprimerVisiteur(${idx})" title="Supprimer">🗑️</button>
+                    </td>
+                    <td>${v.date || ''}</td>
+                    <td>${v.nomPrenom || ''}</td>
+                    <td>${v.dateNaissance || ''}</td>
+                    <td>${v.lieuNaissance || ''}</td>
+                    <td>${getStatutTexte(v.statutVisiteur) || '-'}</td>
+                    <td>${v.nomSociete || ''}</td>
+                    <td>${v.numRC || ''}</td>
+                    <td>${getMotifTexte(v.motifVisite) || '-'}</td>
+                    <td>${getTypeInscriptionTexte(v.typeInscription) || '-'}</td>
+                    <td>${v.numRCInscription || ''}</td>
+                    <td>${v.codeActivite || ''}</td>
+                    <td>${libelle.length > 35 ? libelle.substring(0, 35) + '...' : libelle}</td>
+                    <td>${v.numDenomination || ''}</td>
+                    <td>${v.libelleDenomination || ''}</td>
+                    <td>${(v.observationGenerale || '').substring(0, 30)}${(v.observationGenerale || '').length > 30 ? '...' : ''}</td>
+                </tr>`;
+            });
+        }
+        
+        document.getElementById('nbVisiteurs').innerText = visiteurs.length;
+        const info = document.getElementById('searchInfo');
+        if (filtreRecherche) {
+            info.style.display = 'block';
+            info.innerHTML = `🔍 ${filtres.length} résultat(s) pour "${filtreRecherche}" sur ${visiteurs.length} total`;
+        } else {
+            info.style.display = 'none';
+        }
+    }
+    
+    // ====================================================================
+    // 6. MODIFICATION / SUPPRESSION DES VISITEURS
+    // ====================================================================
+    function modifierVisiteur(idx) {
+        if (currentUser.role !== 'admin') {
+            alert('Vous n\'avez pas les droits pour modifier');
+            return;
+        }
+        const v = visiteurs[idx];
+        if (!v) return;
+        editMode = true;
+        document.getElementById('editIndex').value = idx;
+        document.getElementById('editModeIndicator').style.display = 'block';
+        document.getElementById('cancelEditBtn').style.display = 'block';
+        document.getElementById('submitBtn').style.background = '#ffc107';
+        document.getElementById('submitBtn').innerHTML = '✏️ Mettre à jour';
+        
+        document.getElementById('dateVisite').value = v.date || '';
+        document.getElementById('nomPrenom').value = v.nomPrenom || '';
+        document.getElementById('dateNaissance').value = v.dateNaissance || '';
+        document.getElementById('lieuNaissance').value = v.lieuNaissance || '';
+        document.getElementById('statutVisiteur').value = v.statutVisiteur || '';
+        document.getElementById('nomSociete').value = v.nomSociete || '';
+        document.getElementById('numRC').value = v.numRC || '';
+        document.getElementById('motifVisite').value = v.motifVisite || '';
+        document.getElementById('typeInscription').value = v.typeInscription || '';
+        document.getElementById('numRCInscription').value = v.numRCInscription || '';
+        document.getElementById('codeActivite').value = v.codeActivite || '';
+        document.getElementById('numDenomination').value = v.numDenomination || '';
+        document.getElementById('libelleDenomination').value = v.libelleDenomination || '';
+        document.getElementById('codeActiviteRenseignement').value = v.codeActivite || '';
+        document.getElementById('observationGenerale').value = v.observationGenerale || '';
+        
+        document.getElementById('statutVisiteur').dispatchEvent(new Event('change'));
+        document.getElementById('motifVisite').dispatchEvent(new Event('change'));
+        
+        if (v.codeActivite && activiteMap.has(v.codeActivite)) {
+            const info = document.getElementById('activiteInfo');
+            if (info) {
+                info.style.display = 'block';
+                info.innerHTML = `✅ <strong>${v.codeActivite}</strong> : ${activiteMap.get(v.codeActivite)}`;
+            }
+        }
+        document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function supprimerVisiteur(idx) {
+        if (currentUser.role !== 'admin') {
+            alert('Vous n\'avez pas les droits pour supprimer');
+            return;
+        }
+        if (confirm(`Supprimer l'enregistrement de "${visiteurs[idx].nomPrenom || 'ce visiteur'}" ?`)) {
+            visiteurs.splice(idx, 1);
+            localStorage.setItem('visiteurs_aapi', JSON.stringify(visiteurs));
+            afficherTableau();
+            alert('✅ Supprimé');
+        }
+    }
+    
+    function annulerModification() {
+        editMode = false;
+        document.getElementById('editIndex').value = '-1';
+        document.getElementById('editModeIndicator').style.display = 'none';
+        document.getElementById('cancelEditBtn').style.display = 'none';
+        document.getElementById('submitBtn').style.background = '#0056b3';
+        document.getElementById('submitBtn').innerHTML = '✅ Enregistrer';
+        document.getElementById('visiteurForm').reset();
+        document.getElementById('rcField').style.display = 'none';
+        document.getElementById('societeField').style.display = 'none';
+        document.getElementById('sousMenuInscription').style.display = 'none';
+        document.getElementById('inscriptionRCFields').style.display = 'none';
+        document.getElementById('denominationFields').style.display = 'none';
+        document.getElementById('renseignementFields').style.display = 'none';
+        const infoDiv = document.getElementById('activiteInfo');
+        if (infoDiv) infoDiv.style.display = 'none';
+    }
+    
+    document.getElementById('cancelEditBtn').addEventListener('click', annulerModification);
+    
+    // ====================================================================
+    // 7. ENREGISTREMENT VISITEUR
+    // ====================================================================
+    document.getElementById('visiteurForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const numRCValue = document.getElementById('numRC').value.trim().toUpperCase();
+        if (numRCValue && !validerRC(numRCValue)) {
+            document.getElementById('rcError').style.display = 'block';
+            document.getElementById('numRC').focus();
+            return;
+        }
+        document.getElementById('rcError').style.display = 'none';
+        
+        const nouveau = {
+            date: document.getElementById('dateVisite').value,
+            nomPrenom: document.getElementById('nomPrenom').value.trim().toUpperCase(),
+            dateNaissance: document.getElementById('dateNaissance').value,
+            lieuNaissance: document.getElementById('lieuNaissance').value.trim().toUpperCase(),
+            statutVisiteur: document.getElementById('statutVisiteur').value,
+            nomSociete: document.getElementById('nomSociete').value.trim().toUpperCase(),
+            numRC: nettoyerRC(numRCValue),
+            motifVisite: document.getElementById('motifVisite').value,
+            typeInscription: document.getElementById('typeInscription').value,
+            numRCInscription: nettoyerRC(document.getElementById('numRCInscription').value),
+            codeActivite: document.getElementById('codeActivite')?.value.trim().toUpperCase() || document.getElementById('codeActiviteRenseignement')?.value.trim().toUpperCase() || '',
+            libelleActivite: '',
+            numDenomination: document.getElementById('numDenomination')?.value.trim() || '',
+            libelleDenomination: document.getElementById('libelleDenomination')?.value.trim().toUpperCase() || '',
+            observationGenerale: document.getElementById('observationGenerale').value.trim(),
+            agentNom: currentUser ? `${currentUser.prenom} ${currentUser.nom}` : '',
+            agentService: currentUser ? currentUser.service : '',
+            agentDirection: currentUser ? currentUser.direction : ''
+        };
+        
+        if (nouveau.codeActivite && activiteMap.has(nouveau.codeActivite)) {
+            nouveau.libelleActivite = activiteMap.get(nouveau.codeActivite);
+        }
+        
+        const idx = parseInt(document.getElementById('editIndex').value);
+        if (idx >= 0 && idx < visiteurs.length && currentUser.role === 'admin') {
+            visiteurs[idx] = nouveau;
+            alert('✏️ Visiteur modifié');
+        } else {
+            visiteurs.push(nouveau);
+            alert('✅ Visiteur enregistré');
+        }
+        
+        localStorage.setItem('visiteurs_aapi', JSON.stringify(visiteurs));
+        afficherTableau();
+        annulerModification();
+    });
+    
+    // ====================================================================
+    // 8. ÉDITION STATISTIQUES
+    // ====================================================================
+    function editerStatistiques() {
+        const debut = document.getElementById('statsEditionDebut').value;
+        const fin = document.getElementById('statsEditionFin').value;
+        
+        let filtres = visiteurs;
+        if (debut) filtres = filtres.filter(v => v.date >= debut);
+        if (fin) filtres = filtres.filter(v => v.date <= fin);
+        
+        const stats = {};
+        filtres.forEach(v => {
+            const motif = v.motifVisite || 'Non spécifié';
+            if (!stats[motif]) stats[motif] = 0;
+            stats[motif]++;
+        });
+        
+        const motifs = [
+            { key: 'Inscription_RC', label: 'Inscription RC' },
+            { key: 'Denomination', label: 'Dénomination' },
+            { key: 'Renseignement', label: 'Renseignement' },
+            { key: 'Non spécifié', label: 'Non spécifié' }
+        ];
+        
+        const agentNom = currentUser ? `${currentUser.prenom} ${currentUser.nom}` : '-';
+        const agentService = currentUser ? currentUser.service : '-';
+        const agentDirection = currentUser ? currentUser.direction : '-';
+        
+        let html = `
+            <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div><strong>👤 Agent :</strong> ${agentNom}</div>
+                    <div><strong>🏢 Service :</strong> ${agentService}</div>
+                    <div><strong>📌 Direction :</strong> ${agentDirection}</div>
+                    <div><strong>📅 Période :</strong> ${debut || 'début'} → ${fin || 'fin'}</div>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Motif</th>
+                        <th>Nombre</th>
+                        <th>Pourcentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        const total = filtres.length;
+        motifs.forEach(m => {
+            const count = stats[m.key] || 0;
+            const pourcentage = total > 0 ? Math.round((count / total) * 100) : 0;
+            html += `<tr>
+                <td>${m.label}</td>
+                <td style="text-align:center; font-weight:bold;">${count}</td>
+                <td style="text-align:center;">${pourcentage}%</td>
+            </tr>`;
+        });
+        
+        html += `
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight:bold; background:#f0f0f0;">
+                        <td>TOTAL</td>
+                        <td style="text-align:center;">${total}</td>
+                        <td style="text-align:center;">100%</td>
+                    </tr>
+                </tfoot>
+            </table>
+        `;
+        
+        document.getElementById('statsEditionResult').innerHTML = html;
+    }
+    
+    // ====================================================================
+    // 9. EXPORT STATISTIQUES EXCEL
+    // ====================================================================
+    function exporterStatistiquesExcel() {
+        const debut = document.getElementById('statsEditionDebut').value;
+        const fin = document.getElementById('statsEditionFin').value;
+        
+        let filtres = visiteurs;
+        if (debut) filtres = filtres.filter(v => v.date >= debut);
+        if (fin) filtres = filtres.filter(v => v.date <= fin);
+        
+        const stats = {};
+        filtres.forEach(v => {
+            const motif = v.motifVisite || 'Non spécifié';
+            if (!stats[motif]) stats[motif] = 0;
+            stats[motif]++;
+        });
+        
+        const motifs = [
+            { key: 'Inscription_RC', label: 'Inscription RC' },
+            { key: 'Denomination', label: 'Dénomination' },
+            { key: 'Renseignement', label: 'Renseignement' },
+            { key: 'Non spécifié', label: 'Non spécifié' }
+        ];
+        
+        const total = filtres.length;
+        const data = [
+            ['STATISTIQUES PAR MOTIF'],
+            ['Agent', currentUser ? `${currentUser.prenom} ${currentUser.nom}` : '-'],
+            ['Service', currentUser ? currentUser.service : '-'],
+            ['Direction', currentUser ? currentUser.direction : '-'],
+            ['Période', `${debut || 'début'} → ${fin || 'fin'}`],
+            [],
+            ['Motif', 'Nombre', 'Pourcentage']
+        ];
+        
+        motifs.forEach(m => {
+            const count = stats[m.key] || 0;
+            const pourcentage = total > 0 ? Math.round((count / total) * 100) : 0;
+            data.push([m.label, count, pourcentage + '%']);
+        });
+        
+        data.push([], ['TOTAL', total, '100%']);
+        
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        ws['!cols'] = [{wch:30}, {wch:15}, {wch:15}];
+        XLSX.utils.book_append_sheet(wb, ws, 'Statistiques');
+        XLSX.writeFile(wb, `statistiques_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+    
+    // ====================================================================
+    // 10. IMPRESSION STATISTIQUES
+    // ====================================================================
+    function imprimerStatistiques() {
+        const content = document.getElementById('statsEditionResult');
+        if (!content || !content.innerHTML.trim()) {
+            alert('Veuillez d\'abord générer les statistiques');
+            return;
+        }
+        const win = window.open();
+        win.document.write(`
+            <html><head><title>Statistiques - AAPI</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h2 { color: #0056b3; }
+                table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+                th, td { border: 1px solid #333; padding: 8px; text-align: left; }
+                th { background: #0056b3; color: white; }
+                .header-info { margin-bottom: 20px; }
+                .header-info div { padding: 5px 0; }
+                @media print { .no-print { display: none; } }
+            </style>
+            </head><body>
+            <h2>📊 Statistiques par motif</h2>
+            ${content.innerHTML}
+            <p style="margin-top: 20px; font-size: 11px; color: #666;">
+                Document généré le ${new Date().toLocaleDateString()} à ${new Date().toLocaleTimeString()}
+            </p>
+            </body></html>
+        `);
+        win.document.close();
+        win.print();
+    }
+    
+    // ====================================================================
+    // 11. EXPORT VISITEURS EXCEL
+    // ====================================================================
+    function exporterVisiteursExcel() {
+        const debut = document.getElementById('visiteursEditionDebut').value;
+        const fin = document.getElementById('visiteursEditionFin').value;
+        
+        let filtres = visiteurs;
+        if (debut) filtres = filtres.filter(v => v.date >= debut);
+        if (fin) filtres = filtres.filter(v => v.date <= fin);
+        
+        const agentNom = currentUser ? `${currentUser.prenom} ${currentUser.nom}` : '-';
+        const agentService = currentUser ? currentUser.service : '-';
+        const agentDirection = currentUser ? currentUser.direction : '-';
+        
+        const data = [
+            ['LISTE DES VISITEURS'],
+            ['Agent', agentNom],
+            ['Service', agentService],
+            ['Direction', agentDirection],
+            ['Période', `${debut || 'début'} → ${fin || 'fin'}`],
+            ['Total', filtres.length + ' visiteur(s)'],
+            [],
+            ['Date', 'Visiteur', 'Statut', 'Société', 'N° RC', 'Motif', 'Type Inscription', 'N° RC Inscription', 'Code activité', 'Libellé', 'Observation']
+        ];
+        
+        filtres.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+        
+        filtres.forEach(v => {
+            data.push([
+                v.date || '',
+                v.nomPrenom || '',
+                getStatutTexte(v.statutVisiteur) || '-',
+                v.nomSociete || '',
+                v.numRC || '',
+                getMotifTexte(v.motifVisite) || '-',
+                getTypeInscriptionTexte(v.typeInscription) || '-',
+                v.numRCInscription || '',
+                v.codeActivite || '',
+                v.libelleActivite || '',
+                v.observationGenerale || ''
+            ]);
+        });
+        
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        ws['!cols'] = [{wch:12}, {wch:25}, {wch:18}, {wch:25}, {wch:18}, {wch:18}, {wch:18}, {wch:18}, {wch:12}, {wch:35}, {wch:30}];
+        XLSX.utils.book_append_sheet(wb, ws, 'Visiteurs');
+        XLSX.writeFile(wb, `visiteurs_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+    
+    // ====================================================================
+    // 12. IMPRESSION VISITEURS
+    // ====================================================================
+    function imprimerVisiteurs() {
+        const debut = document.getElementById('visiteursEditionDebut').value;
+        const fin = document.getElementById('visiteursEditionFin').value;
+        
+        let filtres = visiteurs;
+        if (debut) filtres = filtres.filter(v => v.date >= debut);
+        if (fin) filtres = filtres.filter(v => v.date <= fin);
+        
+        if (filtres.length === 0) {
+            alert('Aucun visiteur trouvé pour cette période');
+            return;
+        }
+        
+        const agentNom = currentUser ? `${currentUser.prenom} ${currentUser.nom}` : '-';
+        const agentService = currentUser ? currentUser.service : '-';
+        const agentDirection = currentUser ? currentUser.direction : '-';
+        
+        filtres.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+        
+        let rows = '';
+        filtres.forEach(v => {
+            rows += `<tr>
+                <td>${v.date || ''}</td>
+                <td>${v.nomPrenom || ''}</td>
+                <td>${getStatutTexte(v.statutVisiteur) || '-'}</td>
+                <td>${v.nomSociete || ''}</td>
+                <td>${v.numRC || ''}</td>
+                <td>${getMotifTexte(v.motifVisite) || '-'}</td>
+                <td>${getTypeInscriptionTexte(v.typeInscription) || '-'}</td>
+                <td>${v.numRCInscription || ''}</td>
+                <td>${v.codeActivite || ''}</td>
+                <td>${v.libelleActivite || ''}</td>
+                <td>${v.observationGenerale || ''}</td>
+            </tr>`;
+        });
+        
+        const win = window.open();
+        win.document.write(`
+            <html><head><title>Liste des visiteurs - AAPI</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h2 { color: #0056b3; }
+                table { border-collapse: collapse; width: 100%; margin-top: 15px; font-size: 12px; }
+                th, td { border: 1px solid #333; padding: 6px; text-align: left; }
+                th { background: #0056b3; color: white; }
+                .header-info { margin-bottom: 20px; }
+                .header-info div { padding: 3px 0; }
+            </style>
+            </head><body>
+            <h2>📋 Liste des visiteurs</h2>
+            <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; border:1px solid #ddd;">
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div><strong>👤 Agent :</strong> ${agentNom}</div>
+                    <div><strong>🏢 Service :</strong> ${agentService}</div>
+                    <div><strong>📌 Direction :</strong> ${agentDirection}</div>
+                    <div><strong>📅 Période :</strong> ${debut || 'début'} → ${fin || 'fin'}</div>
+                    <div><strong>📋 Total :</strong> ${filtres.length} visiteur(s)</div>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Visiteur</th>
+                        <th>Statut</th>
+                        <th>Société</th>
+                        <th>N° RC</th>
+                        <th>Motif</th>
+                        <th>Type Ins.</th>
+                        <th>N° RC Ins.</th>
+                        <th>Code</th>
+                        <th>Libellé</th>
+                        <th>Obs.</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <p style="margin-top: 20px; font-size: 11px; color: #666;">
+                Document généré le ${new Date().toLocaleDateString()} à ${new Date().toLocaleTimeString()}
+            </p>
+            </body></html>
+        `);
+        win.document.close();
+        win.print();
+    }
+    
+    // ====================================================================
+    // 13. EXPORT EXCEL (TOUS LES VISITEURS)
+    // ====================================================================
+    function exporterExcel() {
+        if (visiteurs.length === 0) { alert('Aucune donnée'); return; }
+        const data = [
+            ['Date', 'Visiteur', 'Date naissance', 'Lieu naissance', 'Statut', 'Société', 'N° RC', 'Motif', 'Type Inscription', 'N° RC Inscription', 'Code activité', 'Libellé activité', 'N° Dénomination', 'Libellé Dénomination', 'Observation']
+        ];
+        visiteurs.forEach(v => {
+            data.push([
+                v.date || '',
+                v.nomPrenom || '',
+                v.dateNaissance || '',
+                v.lieuNaissance || '',
+                getStatutTexte(v.statutVisiteur) || '-',
+                v.nomSociete || '',
+                v.numRC || '',
+                getMotifTexte(v.motifVisite) || '-',
+                getTypeInscriptionTexte(v.typeInscription) || '-',
+                v.numRCInscription || '',
+                v.codeActivite || '',
+                v.libelleActivite || '',
+                v.numDenomination || '',
+                v.libelleDenomination || '',
+                v.observationGenerale || ''
+            ]);
+        });
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        ws['!cols'] = [{wch:12},{wch:25},{wch:12},{wch:15},{wch:18},{wch:25},{wch:18},{wch:18},{wch:18},{wch:18},{wch:12},{wch:45},{wch:15},{wch:25},{wch:30}];
+        XLSX.utils.book_append_sheet(wb, ws, 'Visiteurs');
+        XLSX.writeFile(wb, `visiteurs_complet_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+    
+    // ====================================================================
+    // 14. IMPORT EXCEL (AVEC CONVERSION DES LIBELLÉS)
+    // ====================================================================
+    function importerExcel() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.xlsx,.xls,.csv';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                try {
+                    const data = new Uint8Array(ev.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                    
+                    if (rows.length < 2) {
+                        alert('Fichier vide ou invalide');
+                        return;
+                    }
+                    
+                    const nouvelles = [];
+                    for (let i = 1; i < rows.length; i++) {
+                        const r = rows[i];
+                        if (r[0]) {
+                            nouvelles.push({
+                                date: r[0] || '',
+                                nomPrenom: r[1] ? String(r[1]).trim().toUpperCase() : '',
+                                dateNaissance: r[2] || '',
+                                lieuNaissance: r[3] ? String(r[3]).trim().toUpperCase() : '',
+                                statutVisiteur: convertirLibelleVersCode(r[4], 'statut') || '',
+                                nomSociete: r[5] ? String(r[5]).trim().toUpperCase() : '',
+                                numRC: r[6] || '',
+                                motifVisite: convertirLibelleVersCode(r[7], 'motif') || '',
+                                typeInscription: convertirLibelleVersCode(r[8], 'typeInscription') || '',
+                                numRCInscription: r[9] || '',
+                                codeActivite: r[10] || '',
+                                libelleActivite: r[11] || '',
+                                numDenomination: r[12] || '',
+                                libelleDenomination: r[13] ? String(r[13]).trim().toUpperCase() : '',
+                                observationGenerale: r[14] || '',
+                                agentNom: '',
+                                agentService: '',
+                                agentDirection: ''
+                            });
+                        }
+                    }
+                    
+                    if (nouvelles.length === 0) {
+                        alert('Aucune donnée valide trouvée dans le fichier');
+                        return;
+                    }
+                    
+                    if (confirm(`${nouvelles.length} enregistrements trouvés. Remplacer les données actuelles ?`)) {
+                        visiteurs = nouvelles;
+                        localStorage.setItem('visiteurs_aapi', JSON.stringify(visiteurs));
+                        afficherTableau();
+                        editerStatistiques();
+                        alert(`✅ ${visiteurs.length} enregistrements importés avec succès !`);
+                    }
+                } catch(err) {
+                    alert('Erreur lors de la lecture du fichier: ' + err.message);
+                    console.error(err);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        };
+        input.click();
+    }
+    
+    // ====================================================================
+    // 15. AUTRES FONCTIONS
+    // ====================================================================
+    function reinitialiserRecherche() {
+        document.getElementById('searchInput').value = '';
+        filtreRecherche = '';
+        afficherTableau();
+    }
+    
+    function imprimerListe() {
+        const filtres = getVisiteursFiltres();
+        if (!filtres.length) { alert('Aucune donnée'); return; }
+        let rows = '';
+        filtres.forEach(v => {
+            rows += `<tr>
+                <td>${v.date||''}</td>
+                <td>${v.nomPrenom||''}</td>
+                <td>${getStatutTexte(v.statutVisiteur) || '-'}</td>
+                <td>${v.nomSociete||''}</td>
+                <td>${v.numRC||''}</td>
+                <td>${getMotifTexte(v.motifVisite) || '-'}</td>
+                <td>${v.codeActivite||''}</td>
+                <td>${v.observationGenerale||''}</td>
+            </tr>`;
+        });
+        const win = window.open();
+        win.document.write(`<html><head><title>Visiteurs - AAPI</title>
+            <style>table{border-collapse:collapse;width:100%} th,td{border:1px solid #000;padding:5px} th{background:#0056b3;color:white}</style>
+            </head><body><h2>Liste des visiteurs - AAPI</h2>
+            <h3>${new Date().toLocaleDateString()}</h3>
+            <table><thead><tr><th>Date</th><th>Visiteur</th><th>Statut</th><th>Société</th><th>N° RC</th><th>Motif</th><th>Code</th><th>Obs.</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
+        win.print();
+    }
+    
+    // ====================================================================
+    // 16. ÉVÉNEMENTS FORMULAIRES
+    // ====================================================================
+    document.getElementById('statutVisiteur').addEventListener('change', function() {
+        const val = this.value;
+        if (val === 'RC_Personne_Physique' || val === 'RC_Personne_Morale') {
+            document.getElementById('rcField').style.display = 'block';
+            if (val === 'RC_Personne_Physique') {
+                document.getElementById('rcFormatInfo').innerHTML = 'Format: <strong style="color:#c62828;">2 chiffres + A + 9 chiffres</strong> (ex: 01A123456789)';
+            } else {
+                document.getElementById('rcFormatInfo').innerHTML = 'Format: <strong style="color:#2e7d32;">2 chiffres + B + 9 chiffres</strong> (ex: 01B123456789)';
+            }
+        } else {
+            document.getElementById('rcField').style.display = 'none';
+        }
+        if (val === 'RC_Personne_Morale') {
+            document.getElementById('societeField').style.display = 'block';
+        } else {
+            document.getElementById('societeField').style.display = 'none';
+        }
+    });
+    
+    document.getElementById('motifVisite').addEventListener('change', function() {
+        const val = this.value;
+        document.getElementById('sousMenuInscription').style.display = 'none';
+        document.getElementById('inscriptionRCFields').style.display = 'none';
+        document.getElementById('denominationFields').style.display = 'none';
+        document.getElementById('renseignementFields').style.display = 'none';
+        if (val === 'Inscription_RC') {
+            document.getElementById('sousMenuInscription').style.display = 'block';
+            document.getElementById('inscriptionRCFields').style.display = 'block';
+        } else if (val === 'Denomination') {
+            document.getElementById('denominationFields').style.display = 'block';
+        } else if (val === 'Renseignement') {
+            document.getElementById('renseignementFields').style.display = 'block';
+        }
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.relative')) {
+            const s1 = document.getElementById('suggestions');
+            const s2 = document.getElementById('suggestionsRenseignement');
+            if (s1) s1.style.display = 'none';
+            if (s2) s2.style.display = 'none';
+        }
+    });
+    
+    // ====================================================================
+    // 17. INITIALISATION
+    // ====================================================================
+    function initialiserApp() {
+        afficherTableau();
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('statsEditionDebut').value = '';
+        document.getElementById('statsEditionFin').value = '';
+        document.getElementById('visiteursEditionDebut').value = '';
+        document.getElementById('visiteursEditionFin').value = '';
+        
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            filtreRecherche = this.value.trim();
+            afficherTableau();
+        });
+        
+        document.getElementById('submitBtn').disabled = false;
+        
+        editerStatistiques();
+    }
+    
+    // Démarrer
+    if (!checkSession()) {
+        document.getElementById('loginPage').style.display = 'block';
+        document.getElementById('appContainer').style.display = 'none';
+    }
+</script>
+</body>
+</html>
